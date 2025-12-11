@@ -1,8 +1,5 @@
-import { Prisma } from "@/lib/generated/prisma/client"
 import type { Inventory } from "@/lib/generated/prisma/client"
-import type { InventoryItem } from "@/lib/types/inventory"
-
-export type { InventoryItem }
+import type { InventoryItem, SellRequestInput } from "@/lib/types/inventory"
 import { prisma } from "@/lib/prisma"
 
 const serializeInventory = (item: Inventory): InventoryItem => ({
@@ -18,16 +15,6 @@ export async function getInventory(): Promise<InventoryItem[]> {
   })
 
   return items.map(serializeInventory)
-}
-
-export interface SellRequestInput {
-  brand: string
-  model: string
-  expectedPrice?: string | null
-  condition: string
-  boxAndPapers: boolean
-  imagesUrl?: string | null
-  contactInfo: Prisma.JsonValue
 }
 
 export async function submitSellRequest(input: SellRequestInput) {
