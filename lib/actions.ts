@@ -1,5 +1,3 @@
-"use server"
-
 import { Prisma } from "@/lib/generated/prisma/client"
 import type { Inventory } from "@/lib/generated/prisma/client"
 import type { InventoryItem } from "@/lib/types/inventory"
