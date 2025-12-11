@@ -29,8 +29,9 @@ const verifyToken = (token: string) => {
   return email
 }
 
-export const setSessionCookie = (email: string) => {
-  cookies().set(COOKIE_NAME, signToken(email), {
+export const setSessionCookie = async (email: string) => {
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NAME, signToken(email), {
     httpOnly: true,
     sameSite: "lax",
     secure: true,
@@ -39,12 +40,14 @@ export const setSessionCookie = (email: string) => {
   })
 }
 
-export const clearSessionCookie = () => {
-  cookies().delete(COOKIE_NAME)
+export const clearSessionCookie = async () => {
+  const cookieStore = await cookies()
+  cookieStore.delete(COOKIE_NAME)
 }
 
-export const getSessionEmail = () => {
-  const token = cookies().get(COOKIE_NAME)?.value
+export const getSessionEmail = async () => {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(COOKIE_NAME)?.value
   if (!token) return null
   return verifyToken(token)
 }

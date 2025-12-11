@@ -5,8 +5,8 @@ import { importListings, parseListingsFromJson, toSlug, ensureUniqueSlug } from 
 import { validateCredentials, setSessionCookie, clearSessionCookie, getSessionEmail } from "@/lib/admin-auth"
 import { prisma } from "@/lib/prisma"
 
-const requireAdmin = () => {
-  const email = getSessionEmail()
+const requireAdmin = async () => {
+  const email = await getSessionEmail()
   if (!email) {
     throw new Error("Unauthorized")
   }
@@ -21,17 +21,17 @@ export async function adminLogin(formData: FormData) {
     return { success: false, error: "Invalid credentials" }
   }
 
-  setSessionCookie(email)
+  await setSessionCookie(email)
   return { success: true }
 }
 
 export async function adminLogout() {
-  clearSessionCookie()
+  await clearSessionCookie()
   return { success: true }
 }
 
 export async function importJsonAction(formData: FormData) {
-  requireAdmin()
+  await requireAdmin()
 
   const file = formData.get("file")
   if (!(file instanceof File)) {
@@ -58,7 +58,7 @@ export async function importJsonAction(formData: FormData) {
 }
 
 export async function createInventoryAction(formData: FormData) {
-  requireAdmin()
+  await requireAdmin()
 
   const brand = (formData.get("brand") ?? "").toString().trim()
   const model = (formData.get("model") ?? "").toString().trim()
@@ -114,4 +114,61 @@ export async function createInventoryAction(formData: FormData) {
   }
 
   return { success: true, slug }
+}
+
+export async function getSellRequests() {
+  await requireAdmin()
+  
+  const requests = await prisma.sellRequest.findMany({
+    orderBy: { createdAt: "desc" },
+  })
+  
+  return requests.map((r) => ({
+    ...r,
+    createdAt: r.createdAt.toISOString(),
+  }))
+}
+
+export async function getInquiries() {
+  await requireAdmin()
+  
+  const inquiries = await prisma.inquiry.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      watch: {
+        select: {
+          brand: true,
+          model: true,
+          slug: true,
+        },
+      },
+    },
+  })
+  
+  return inquiries.map((i) => ({
+    ...i,
+    createdAt: i.createdAt.toISOString(),
+  }))
+}
+
+export async function updateSellRequestStatus(id: string, status: string) {
+  await requireAdmin()
+  
+  await prisma.sellRequest.update({
+    where: { id },
+    data: { status },
+  })
+  
+  return { success: true }
+}
+
+export async function updateInquiryType(id: string, type: string) {
+  await requireAdmin()
+  
+  await prisma.inquiry.update({
+    where: { id },
+    data: { type },
+  })
+  
+  return { success: true }
 }

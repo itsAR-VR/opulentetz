@@ -18,25 +18,16 @@ const cormorant = Cormorant_Garamond({
 })
 
 export const metadata: Metadata = {
-  title: "Opulent ETZ | Luxury Pre-Owned Timepieces",
+  title: "Exclusive Time Zone | Luxury Pre-Owned Watches in Canada",
   description:
-    "Your trusted destination for authenticated pre-owned luxury watches. Rolex, Patek Philippe, Audemars Piguet, and more.",
-  generator: "v0.app",
+    "Canada's trusted destination for authenticated pre-owned luxury watches. Rolex, Patek Philippe, Audemars Piguet, Richard Mille and more. Vancouver, Calgary, Toronto.",
   icons: {
     icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
+      { url: "/icon-light-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-dark-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
     ],
+    shortcut: "/icon-light-32x32.png",
     apple: "/apple-icon.png",
   },
 }

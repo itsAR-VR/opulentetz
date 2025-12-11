@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Image from "next/image"
-import { ArrowRight, Upload, CheckCircle2, Clock, DollarSign, Send } from "lucide-react"
+import { ArrowRight, Upload, CheckCircle2, Clock, DollarSign, Send, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { brands } from "@/lib/mock-data"
+import { submitSellRequest } from "./actions"
 
 const steps = [
   {
@@ -52,6 +53,8 @@ export default function SellPage() {
     comments: "",
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -71,7 +74,16 @@ export default function SellPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setError(null)
+
+    startTransition(async () => {
+      const result = await submitSellRequest(formData)
+      if (result.success) {
+        setSubmitted(true)
+      } else {
+        setError(result.error ?? "Something went wrong. Please try again.")
+      }
+    })
   }
 
   if (submitted) {
@@ -377,13 +389,26 @@ export default function SellPage() {
                     />
                   </div>
 
+                  {error && (
+                    <p className="mt-4 text-sm text-red-500">{error}</p>
+                  )}
+
                   <div className="mt-8 flex justify-between">
-                    <Button type="button" variant="outline" onClick={handlePrevStep}>
+                    <Button type="button" variant="outline" onClick={handlePrevStep} disabled={isPending}>
                       Back
                     </Button>
-                    <Button type="submit" className="bg-gold hover:bg-gold/90 text-black">
-                      Submit Quote Request
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button type="submit" className="bg-gold hover:bg-gold/90 text-black" disabled={isPending}>
+                      {isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          Submit Quote Request
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
                     </Button>
                   </div>
                 </CardContent>

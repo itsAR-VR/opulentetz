@@ -2,18 +2,52 @@
 
 import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
-import { adminLogin, adminLogout, importJsonAction, createInventoryAction } from "./actions"
+import { adminLogin, adminLogout, importJsonAction, createInventoryAction, updateSellRequestStatus } from "./actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Mail, Phone, Clock, Package, User } from "lucide-react"
+
+interface SellRequest {
+  id: string
+  createdAt: string
+  brand: string
+  model: string
+  expectedPrice: string | null
+  condition: string
+  boxAndPapers: boolean
+  imagesUrl: string | null
+  contactInfo: Record<string, unknown>
+  status: string
+}
+
+interface Inquiry {
+  id: string
+  createdAt: string
+  name: string
+  email: string
+  phone: string | null
+  type: string
+  message: string | null
+  watchId: string | null
+  watch: {
+    brand: string
+    model: string
+    slug: string
+  } | null
+}
 
 interface Props {
   sessionEmail: string | null
+  sellRequests: SellRequest[]
+  inquiries: Inquiry[]
 }
 
-export default function AdminDashboardClient({ sessionEmail }: Props) {
+export default function AdminDashboardClient({ sessionEmail, sellRequests, inquiries }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [loginError, setLoginError] = useState<string | null>(null)
@@ -210,6 +244,214 @@ export default function AdminDashboardClient({ sessionEmail }: Props) {
             </CardContent>
           </Card>
         </div>
+
+        {/* Sell/Trade Requests Section */}
+        <div className="h-px w-full bg-border mt-8" />
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-serif flex items-center gap-2">
+              <Package className="h-5 w-5 text-gold" />
+              Sell/Trade Requests ({sellRequests.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {sellRequests.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No sell/trade requests yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {sellRequests.map((request) => {
+                  const contact = request.contactInfo as Record<string, string>
+                  return (
+                    <div key={request.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {request.brand} {request.model}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <Clock className="h-3 w-3" />
+                            {new Date(request.createdAt).toLocaleDateString("en-CA", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              request.status === "New"
+                                ? "default"
+                                : request.status === "Contacted"
+                                ? "secondary"
+                                : request.status === "Completed"
+                                ? "outline"
+                                : "destructive"
+                            }
+                          >
+                            {request.status}
+                          </Badge>
+                          <Select
+                            defaultValue={request.status}
+                            onValueChange={(value) => {
+                              startTransition(async () => {
+                                await updateSellRequestStatus(request.id, value)
+                                router.refresh()
+                              })
+                            }}
+                          >
+                            <SelectTrigger className="w-[130px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="New">New</SelectItem>
+                              <SelectItem value="Contacted">Contacted</SelectItem>
+                              <SelectItem value="In Progress">In Progress</SelectItem>
+                              <SelectItem value="Completed">Completed</SelectItem>
+                              <SelectItem value="Declined">Declined</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Condition:</span>{" "}
+                          <span className="font-medium">{request.condition}</span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Box & Papers:</span>{" "}
+                          <span className="font-medium">{request.boxAndPapers ? "Yes" : "No"}</span>
+                        </div>
+                        {contact?.reference && (
+                          <div>
+                            <span className="text-muted-foreground">Reference:</span>{" "}
+                            <span className="font-medium">{contact.reference}</span>
+                          </div>
+                        )}
+                        {contact?.year && (
+                          <div>
+                            <span className="text-muted-foreground">Year:</span>{" "}
+                            <span className="font-medium">{contact.year}</span>
+                          </div>
+                        )}
+                        {contact?.transactionType && (
+                          <div>
+                            <span className="text-muted-foreground">Type:</span>{" "}
+                            <span className="font-medium capitalize">{contact.transactionType}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="border-t pt-3 mt-3">
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          <div className="flex items-center gap-1">
+                            <User className="h-3 w-3 text-muted-foreground" />
+                            <span>{contact?.firstName} {contact?.lastName}</span>
+                          </div>
+                          <a
+                            href={`mailto:${contact?.email}`}
+                            className="flex items-center gap-1 text-gold hover:underline"
+                          >
+                            <Mail className="h-3 w-3" />
+                            {contact?.email}
+                          </a>
+                          {contact?.phone && (
+                            <a
+                              href={`tel:${contact.phone}`}
+                              className="flex items-center gap-1 text-gold hover:underline"
+                            >
+                              <Phone className="h-3 w-3" />
+                              {contact.phone}
+                            </a>
+                          )}
+                        </div>
+                        {contact?.comments && (
+                          <p className="mt-2 text-sm text-muted-foreground italic">
+                            &ldquo;{contact.comments}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Inquiries Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-serif flex items-center gap-2">
+              <Mail className="h-5 w-5 text-gold" />
+              Inquiries ({inquiries.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {inquiries.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">No inquiries yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {inquiries.map((inquiry) => (
+                  <div key={inquiry.id} className="border rounded-lg p-4 space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold">{inquiry.name}</h3>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {new Date(inquiry.createdAt).toLocaleDateString("en-CA", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </div>
+                      <Badge variant="outline">{inquiry.type}</Badge>
+                    </div>
+                    
+                    {inquiry.watch && (
+                      <p className="text-sm">
+                        <span className="text-muted-foreground">Watch:</span>{" "}
+                        <span className="font-medium">{inquiry.watch.brand} {inquiry.watch.model}</span>
+                      </p>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-4 text-sm">
+                      <a
+                        href={`mailto:${inquiry.email}`}
+                        className="flex items-center gap-1 text-gold hover:underline"
+                      >
+                        <Mail className="h-3 w-3" />
+                        {inquiry.email}
+                      </a>
+                      {inquiry.phone && (
+                        <a
+                          href={`tel:${inquiry.phone}`}
+                          className="flex items-center gap-1 text-gold hover:underline"
+                        >
+                          <Phone className="h-3 w-3" />
+                          {inquiry.phone}
+                        </a>
+                      )}
+                    </div>
+                    
+                    {inquiry.message && (
+                      <p className="text-sm text-muted-foreground mt-2 italic">
+                        &ldquo;{inquiry.message}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </main>
   )
