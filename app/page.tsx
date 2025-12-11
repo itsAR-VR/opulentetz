@@ -3,7 +3,7 @@ import Image from "next/image"
 import { ArrowRight, Shield, Award, RefreshCw, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { WatchCard } from "@/components/watch-card"
-import { watches } from "@/lib/mock-data"
+import { getInventory } from "@/lib/actions"
 
 const valueProps = [
   {
@@ -28,8 +28,9 @@ const valueProps = [
   },
 ]
 
-export default function HomePage() {
-  const featuredWatches = watches.filter((w) => w.featured).slice(0, 4)
+export default async function HomePage() {
+  const inventory = await getInventory()
+  const featuredWatches = inventory.filter((w) => w.featured).slice(0, 4)
 
   return (
     <div>

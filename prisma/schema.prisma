@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Inventory {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  brand        String
+  model        String
+  reference    String
+  year         Int
+  condition    String
+  price        Decimal  @db.Decimal(10, 2)
+  status       String   @default("Available")
+  boxAndPapers Boolean  @default(true)
+  description  String   @db.Text
+  images       String[]
+  slug         String   @unique
+  featured     Boolean  @default(false)
+  externalId   String?  @unique
+  sourceUrl    String?
+
+  inquiries Inquiry[]
+
+  @@index([brand])
+  @@index([status])
+  @@index([externalId])
+}
+
+model Inquiry {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String
+  email     String
+  phone     String?
+  type      String
+  message   String?  @db.Text
+  watchId   String?
+  watch     Inventory? @relation(fields: [watchId], references: [id])
+
+  @@index([watchId])
+}
+
+model SellRequest {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  brand         String
+  model         String
+  expectedPrice String?
+  condition     String
+  boxAndPapers  Boolean
+  imagesUrl     String?
+  contactInfo   Json
+  status        String   @default("New")
+}

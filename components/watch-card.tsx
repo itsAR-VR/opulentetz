@@ -2,10 +2,16 @@ import Image from "next/image"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import type { Watch } from "@/lib/mock-data"
+import type { InventoryItem } from "@/lib/types/inventory"
+
+type WatchCardData = Pick<
+  InventoryItem,
+  "id" | "brand" | "model" | "reference" | "year" | "condition" | "price" | "status" | "boxAndPapers" | "images" | "slug"
+> &
+  Partial<Pick<InventoryItem, "description" | "featured" | "externalId" | "sourceUrl" | "createdAt" | "updatedAt">>
 
 interface WatchCardProps {
-  watch: Watch
+  watch: WatchCardData
 }
 
 export function WatchCard({ watch }: WatchCardProps) {
