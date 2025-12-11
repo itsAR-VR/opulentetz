@@ -45,7 +45,7 @@ const locations = [
   {
     name: "Toronto",
     address: "25 Sheppard Ave W, North York, ON M2N 6S6",
-    phone: "514-298-8666",
+    phone: "416-298-8666",
   },
 ]
 

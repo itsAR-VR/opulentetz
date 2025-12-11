@@ -292,8 +292,8 @@ export default async function WatchDetailPage({
                 <h3 className="font-medium mb-2">Toronto</h3>
                 <p className="text-sm text-muted-foreground mb-1">25 Sheppard Ave W</p>
                 <p className="text-sm text-muted-foreground mb-2">North York, ON M2N 6S6</p>
-                <a href="tel:514-298-8666" className="text-gold text-sm hover:underline">
-                  514-298-8666
+                <a href="tel:416-298-8666" className="text-gold text-sm hover:underline">
+                  416-298-8666
                 </a>
               </div>
             </div>
