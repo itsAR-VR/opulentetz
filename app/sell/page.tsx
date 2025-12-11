@@ -451,11 +451,12 @@ export default function SellPage() {
                             key={file.id}
                             className="relative aspect-square rounded-lg overflow-hidden border bg-muted"
                           >
-                            <Image
+                            {/* Using img tag for blob URLs - Next.js Image doesn't support blob: protocol */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
                               src={file.preview}
                               alt="Upload preview"
-                              fill
-                              className="object-cover"
+                              className="absolute inset-0 w-full h-full object-cover"
                             />
                             {file.uploading && (
                               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
