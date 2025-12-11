@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useRef, useCallback } from "react"
 import Image from "next/image"
-import { ArrowRight, Upload, CheckCircle2, Clock, DollarSign, Send, Loader2 } from "lucide-react"
+import { ArrowRight, Upload, CheckCircle2, Clock, DollarSign, Send, Loader2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,7 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent } from "@/components/ui/card"
 import { brands } from "@/lib/mock-data"
-import { submitSellRequest } from "./actions"
+import { submitSellRequest, uploadImage } from "./actions"
+
+interface UploadedFile {
+  id: string
+  file: File
+  preview: string
+  url?: string
+  uploading: boolean
+  error?: string
+}
 
 const steps = [
   {
@@ -55,6 +64,9 @@ export default function SellPage() {
   const [submitted, setSubmitted] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -72,12 +84,97 @@ export default function SellPage() {
     }
   }
 
+  const processFiles = useCallback(async (files: FileList | File[]) => {
+    const fileArray = Array.from(files)
+    const validFiles = fileArray.filter(
+      (file) => file.type.startsWith("image/") && file.size <= 10 * 1024 * 1024
+    )
+
+    if (validFiles.length === 0) return
+
+    // Add files to state with preview
+    const newFiles: UploadedFile[] = validFiles.map((file) => ({
+      id: Math.random().toString(36).substring(2, 15),
+      file,
+      preview: URL.createObjectURL(file),
+      uploading: true,
+    }))
+
+    setUploadedFiles((prev) => [...prev, ...newFiles])
+
+    // Upload each file
+    for (const uploadedFile of newFiles) {
+      const formData = new FormData()
+      formData.append("file", uploadedFile.file)
+
+      const result = await uploadImage(formData)
+
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadedFile.id
+            ? {
+                ...f,
+                uploading: false,
+                url: result.success ? result.url : undefined,
+                error: result.success ? undefined : result.error,
+              }
+            : f
+        )
+      )
+    }
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault()
+      setIsDragging(false)
+      if (e.dataTransfer.files) {
+        processFiles(e.dataTransfer.files)
+      }
+    },
+    [processFiles]
+  )
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        processFiles(e.target.files)
+      }
+    },
+    [processFiles]
+  )
+
+  const handleRemoveFile = useCallback((id: string) => {
+    setUploadedFiles((prev) => {
+      const file = prev.find((f) => f.id === id)
+      if (file) {
+        URL.revokeObjectURL(file.preview)
+      }
+      return prev.filter((f) => f.id !== id)
+    })
+  }, [])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
+    // Get successfully uploaded image URLs
+    const imageUrls = uploadedFiles
+      .filter((f) => f.url && !f.error)
+      .map((f) => f.url!)
+
     startTransition(async () => {
-      const result = await submitSellRequest(formData)
+      const result = await submitSellRequest({ ...formData, imageUrls })
       if (result.success) {
         setSubmitted(true)
       } else {
@@ -314,23 +411,104 @@ export default function SellPage() {
                   <h2 className="font-serif text-2xl font-medium mb-2">Upload Photos</h2>
                   <p className="text-muted-foreground mb-6">Clear photos help us provide the most accurate quote</p>
 
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-gold/50 transition-colors cursor-pointer">
+                  {/* Drop Zone */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                      isDragging
+                        ? "border-gold bg-gold/5"
+                        : "border-border hover:border-gold/50"
+                    }`}
+                  >
                     <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
                     <p className="font-medium">Drag and drop your photos here</p>
                     <p className="text-sm text-muted-foreground mt-1">or click to browse</p>
                     <p className="text-xs text-muted-foreground mt-4">
                       PNG, JPG up to 10MB each. Include front, back, and side views.
                     </p>
-                    <Input type="file" className="hidden" accept="image/*" multiple />
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      multiple
+                      onChange={handleFileInputChange}
+                    />
                   </div>
+
+                  {/* Uploaded Files Preview */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-6">
+                      <p className="text-sm font-medium mb-3">
+                        Uploaded Photos ({uploadedFiles.length})
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {uploadedFiles.map((file) => (
+                          <div
+                            key={file.id}
+                            className="relative aspect-square rounded-lg overflow-hidden border bg-muted"
+                          >
+                            <Image
+                              src={file.preview}
+                              alt="Upload preview"
+                              fill
+                              className="object-cover"
+                            />
+                            {file.uploading && (
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                <Loader2 className="h-6 w-6 text-white animate-spin" />
+                              </div>
+                            )}
+                            {file.error && (
+                              <div className="absolute inset-0 bg-red-500/80 flex items-center justify-center p-2">
+                                <p className="text-white text-xs text-center">{file.error}</p>
+                              </div>
+                            )}
+                            {file.url && !file.uploading && (
+                              <div className="absolute top-1 right-1">
+                                <CheckCircle2 className="h-5 w-5 text-green-500 bg-white rounded-full" />
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRemoveFile(file.id)
+                              }}
+                              className="absolute top-1 left-1 p-1 bg-black/70 rounded-full hover:bg-black transition-colors"
+                            >
+                              <X className="h-4 w-4 text-white" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-8 flex justify-between">
                     <Button type="button" variant="outline" onClick={handlePrevStep}>
                       Back
                     </Button>
-                    <Button type="button" onClick={handleNextStep} className="bg-gold hover:bg-gold/90 text-black">
-                      Continue
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                    <Button 
+                      type="button" 
+                      onClick={handleNextStep} 
+                      className="bg-gold hover:bg-gold/90 text-black"
+                      disabled={uploadedFiles.some((f) => f.uploading)}
+                    >
+                      {uploadedFiles.some((f) => f.uploading) ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          Continue
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
                     </Button>
                   </div>
                 </CardContent>

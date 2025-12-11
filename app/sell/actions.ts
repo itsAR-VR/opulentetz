@@ -1,6 +1,7 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { supabase } from "@/lib/supabase"
 
 interface SellFormData {
   brand: string
@@ -15,10 +16,69 @@ interface SellFormData {
   email: string
   phone: string
   comments: string
+  imageUrls?: string[]
+}
+
+export async function uploadImage(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
+  try {
+    const file = formData.get("file") as File
+    if (!file) {
+      return { success: false, error: "No file provided" }
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      return { success: false, error: "Only image files are allowed" }
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      return { success: false, error: "File size must be less than 10MB" }
+    }
+
+    // Generate unique filename
+    const timestamp = Date.now()
+    const randomId = Math.random().toString(36).substring(2, 15)
+    const extension = file.name.split(".").pop()
+    const fileName = `sell-requests/${timestamp}-${randomId}.${extension}`
+
+    // Convert file to buffer
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = new Uint8Array(arrayBuffer)
+
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from("watch-images")
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        cacheControl: "3600",
+        upsert: false,
+      })
+
+    if (error) {
+      console.error("Supabase upload error:", error)
+      return { success: false, error: "Failed to upload image" }
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from("watch-images")
+      .getPublicUrl(data.path)
+
+    return { success: true, url: urlData.publicUrl }
+  } catch (error) {
+    console.error("Error uploading image:", error)
+    return { success: false, error: "Failed to upload image" }
+  }
 }
 
 export async function submitSellRequest(data: SellFormData) {
   try {
+    // Join image URLs into a single string if present
+    const imagesUrl = data.imageUrls && data.imageUrls.length > 0 
+      ? data.imageUrls.join(",") 
+      : null
+
     const record = await prisma.sellRequest.create({
       data: {
         brand: data.brand,
@@ -26,7 +86,7 @@ export async function submitSellRequest(data: SellFormData) {
         expectedPrice: null,
         condition: data.condition,
         boxAndPapers: data.hasBoxPapers === "yes",
-        imagesUrl: null,
+        imagesUrl,
         contactInfo: {
           firstName: data.firstName,
           lastName: data.lastName,
