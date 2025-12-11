@@ -7,7 +7,8 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "import-facebook": "tsx scripts/import_facebook.ts"
+    "import-facebook": "tsx scripts/import_facebook.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
