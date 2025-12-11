@@ -8,12 +8,9 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const locations = [
+  { name: "Vancouver (HQ)", href: "/locations/vancouver-luxury-watches" },
   { name: "Calgary", href: "/locations/calgary-luxury-watches" },
   { name: "Toronto", href: "/locations/toronto-luxury-watches" },
-  { name: "Edmonton", href: "/locations/edmonton-luxury-watches" },
-  { name: "Kelowna", href: "/locations/kelowna-luxury-watches" },
-  { name: "Montreal", href: "/locations/montreal-luxury-watches" },
-  { name: "Winnipeg", href: "/locations/winnipeg-luxury-watches" },
 ]
 
 const navLinks = [
@@ -33,7 +30,7 @@ export function Header() {
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/images/calgary-20etz-20logo-20gold.avif"
-              alt="Opulent ETZ"
+              alt="Exclusive Time Zone"
               width={180}
               height={50}
               className="h-12 w-auto"

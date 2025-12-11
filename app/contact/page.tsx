@@ -13,28 +13,40 @@ const contactMethods = [
   {
     icon: Mail,
     title: "Email",
-    value: "info@calgaryetz.com",
-    href: "mailto:info@calgaryetz.com",
+    value: "info@exclusivetimezone.com",
+    href: "mailto:info@exclusivetimezone.com",
     description: "We respond within 24 hours",
   },
   {
     title: "Phone",
-    value: "(403) 555-0123",
-    href: "tel:+14035550123",
-    description: "Mon-Sat, 10am-6pm MST",
+    value: "236-334-3434",
+    href: "tel:236-334-3434",
+    description: "Mon-Sat, by appointment",
   },
   {
-    title: "Facebook Messenger",
-    value: "Message Us",
-    href: "https://www.facebook.com/marketplace/profile/100082510053081",
-    description: "Quick responses via Messenger",
+    title: "Instagram",
+    value: "@exclusivetimezone",
+    href: "https://www.instagram.com/exclusivetimezone/",
+    description: "Follow us for updates",
   },
 ]
 
 const locations = [
-  { name: "Calgary (HQ)", address: "123 Luxury Lane, Calgary, AB T2P 1A1" },
-  { name: "Toronto", address: "456 Bay Street, Toronto, ON M5H 2Y4" },
-  { name: "Edmonton", address: "789 Jasper Ave, Edmonton, AB T5J 1N9" },
+  {
+    name: "Vancouver HQ",
+    address: "943 W Broadway, Unit 110, Vancouver, BC V5Z 4E1",
+    phone: "236-833-3952",
+  },
+  {
+    name: "Calgary",
+    address: "2120 4th Street SW, Unit 210, Calgary, AB T2S 1W7",
+    phone: "403-703-6671",
+  },
+  {
+    name: "Toronto",
+    address: "25 Sheppard Ave W, North York, ON M2N 6S6",
+    phone: "514-298-8666",
+  },
 ]
 
 export default function ContactPage() {
@@ -63,7 +75,14 @@ export default function ContactPage() {
       <section className="bg-black text-white py-16 lg:py-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-medium mb-4">Contact Us</h1>
-          <p className="text-gray-400">We'd love to hear from you</p>
+          <p className="text-gray-400">
+            Fill out the form below and we will get back to you as soon as possible.
+            <br />
+            For the fastest response, call us at{" "}
+            <a href="tel:236-334-3434" className="text-gold hover:underline">
+              236-334-3434
+            </a>
+          </p>
         </div>
       </section>
 
@@ -142,7 +161,7 @@ export default function ContactPage() {
                     type="tel"
                     value={formState.phone}
                     onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                    placeholder="(403) 555-0123"
+                    placeholder="236-334-3434"
                   />
                 </div>
                 <div className="space-y-2">
@@ -187,6 +206,25 @@ export default function ContactPage() {
               </Button>
             </form>
           )}
+        </div>
+      </section>
+
+      {/* Locations Section */}
+      <section className="py-16 bg-muted/30 border-t border-border">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="font-serif text-2xl font-medium text-center mb-8">Our Locations</h2>
+          <p className="text-center text-muted-foreground mb-8">All locations by appointment only</p>
+          <div className="grid sm:grid-cols-3 gap-8">
+            {locations.map((location) => (
+              <div key={location.name} className="text-center">
+                <h3 className="font-medium mb-2">{location.name}</h3>
+                <p className="text-sm text-muted-foreground mb-2">{location.address}</p>
+                <a href={`tel:${location.phone}`} className="text-gold hover:underline text-sm">
+                  {location.phone}
+                </a>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

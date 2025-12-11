@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { WatchCard } from "@/components/watch-card"
 import { Button } from "@/components/ui/button"
-import { watches } from "@/lib/mock-data"
+import { prisma } from "@/lib/prisma"
 
 interface LocationData {
   name: string
@@ -18,125 +18,65 @@ interface LocationData {
 }
 
 const locationData: Record<string, LocationData> = {
+  "vancouver-luxury-watches": {
+    name: "Vancouver",
+    slug: "vancouver-luxury-watches",
+    city: "Vancouver",
+    province: "British Columbia",
+    phone: "236-833-3952",
+    email: "info@exclusivetimezone.com",
+    description:
+      "Exclusive Time Zone headquarters in Vancouver - Canada's premier destination for authenticated luxury watches.",
+    seoContent: `Welcome to Exclusive Time Zone's Vancouver headquarters, your premier destination for authenticated pre-owned luxury watches in British Columbia. Located in the heart of Vancouver at 943 W Broadway, we specialize in sought-after brands including Rolex, Patek Philippe, Audemars Piguet, Omega, Richard Mille, and Cartier.
+
+Our team of experienced watch specialists provides honest assessments and competitive offers for every timepiece. Whether you're looking to purchase your first luxury watch, add to an existing collection, or sell a timepiece you no longer wear, we ensure every transaction is transparent and fair.
+
+We serve collectors throughout the Greater Vancouver Area including Burnaby, Richmond, North Vancouver, West Vancouver, Surrey, and Coquitlam. Our showroom is available by appointment only, ensuring personalized attention for every client.
+
+Exclusive Time Zone has built its reputation on authenticity, fair pricing, and exceptional customer service. Every watch we sell undergoes thorough authentication to ensure you receive exactly what you're paying for.`,
+    metaTitle: "Luxury Watches Vancouver | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Exclusive Time Zone",
+    metaDescription:
+      "Vancouver's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet, Omega & Cartier watches. Buy, sell, or trade with confidence at Exclusive Time Zone.",
+  },
   "calgary-luxury-watches": {
     name: "Calgary",
     slug: "calgary-luxury-watches",
     city: "Calgary",
     province: "Alberta",
-    phone: "(403) 555-0123",
-    email: "calgary@calgaryetz.com",
+    phone: "403-703-6671",
+    email: "info@exclusivetimezone.com",
     description:
-      "Calgary ETZ is your trusted source for buying and selling pre-owned luxury watches in Calgary, Alberta.",
-    seoContent: `As Calgary's premier destination for pre-owned luxury timepieces, Calgary ETZ has built a reputation for authenticity, fair pricing, and exceptional customer service. We specialize in sought-after brands including Rolex, Patek Philippe, Audemars Piguet, Omega, and Cartier.
+      "Exclusive Time Zone Calgary - your trusted source for buying and selling pre-owned luxury watches in Alberta.",
+    seoContent: `Exclusive Time Zone's Calgary location serves collectors throughout Alberta with authenticated pre-owned luxury watches. Located at 2120 4th Street SW, Unit 210, we specialize in sought-after brands including Rolex, Patek Philippe, Audemars Piguet, Omega, and Cartier.
 
-Whether you're looking to purchase your first luxury watch, add to an existing collection, or sell a timepiece you no longer wear, our team provides honest assessments and competitive offers. Every watch we sell undergoes thorough authentication to ensure you receive exactly what you're paying for.
+Our Calgary showroom is available by appointment only, ensuring personalized attention for every client. Whether you're looking to purchase your first luxury watch, add to an existing collection, or sell a timepiece you no longer wear, our team provides honest assessments and competitive offers.
 
-We serve collectors throughout Calgary and surrounding areas including Airdrie, Cochrane, Okotoks, and Chestermere. Our process is simple: contact us with details about your watch, receive a fair quote, and complete your transaction with confidence.
+We serve collectors throughout Calgary and surrounding areas including Airdrie, Cochrane, Okotoks, Chestermere, and Red Deer. Every watch we sell undergoes thorough authentication to ensure you receive exactly what you're paying for.
 
-Calgary ETZ is proud to maintain a 5-star reputation on Facebook Marketplace with hundreds of successful transactions. We believe in transparency, fair dealing, and building long-term relationships with collectors across Alberta.`,
-    metaTitle: "Luxury Watches Calgary | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
+Exclusive Time Zone is proud to maintain an excellent reputation with hundreds of successful transactions. We believe in transparency, fair dealing, and building long-term relationships with collectors across Alberta.`,
+    metaTitle: "Luxury Watches Calgary | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Exclusive Time Zone",
     metaDescription:
-      "Calgary's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet, Omega & Cartier watches. Buy, sell, or trade with confidence. 5-star rated.",
+      "Calgary's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet, Omega & Cartier watches. Buy, sell, or trade with confidence at Exclusive Time Zone.",
   },
   "toronto-luxury-watches": {
     name: "Toronto",
     slug: "toronto-luxury-watches",
     city: "Toronto",
     province: "Ontario",
-    phone: "(416) 555-0456",
-    email: "toronto@calgaryetz.com",
+    phone: "514-298-8666",
+    email: "info@exclusivetimezone.com",
     description:
-      "Calgary ETZ brings trusted luxury watch buying and selling services to Toronto and the Greater Toronto Area.",
-    seoContent: `Calgary ETZ now serves Toronto and the Greater Toronto Area, bringing our reputation for authenticity and fair dealing to Ontario's largest city. We specialize in pre-owned luxury watches from brands including Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and IWC.
+      "Exclusive Time Zone Toronto - bringing trusted luxury watch services to the Greater Toronto Area.",
+    seoContent: `Exclusive Time Zone serves Toronto and the Greater Toronto Area with authenticated pre-owned luxury watches. Located at 25 Sheppard Ave W in North York, we specialize in pre-owned luxury watches from brands including Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and IWC.
 
-Toronto collectors can expect the same high standards that have made Calgary ETZ a trusted name in Western Canada. Every watch is authenticated by experienced professionals, and we provide detailed condition reports for complete transparency.
+Toronto collectors can expect the same high standards that have made Exclusive Time Zone a trusted name across Canada. Every watch is authenticated by experienced professionals, and we provide detailed condition reports for complete transparency.
 
-We work with clients across the GTA including Mississauga, Brampton, Markham, Vaughan, Richmond Hill, and Oakville. Whether you're buying your first Submariner or selling a vintage Daytona, our team is ready to assist.
+We work with clients across the GTA including Mississauga, Brampton, Markham, Vaughan, Richmond Hill, and Oakville. Our showroom is available by appointment only. Whether you're buying your first Submariner or selling a vintage Daytona, our team is ready to assist.
 
 Our commitment to fair pricing means we research current market values to ensure competitive offers on watches we purchase and reasonable prices on watches we sell. Contact us today to discuss your luxury watch needs in Toronto.`,
-    metaTitle: "Luxury Watches Toronto | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
+    metaTitle: "Luxury Watches Toronto | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Exclusive Time Zone",
     metaDescription:
-      "Toronto's source for authenticated pre-owned Rolex, Patek Philippe, Audemars Piguet & more. Buy, sell, or trade luxury watches with Calgary ETZ.",
-  },
-  "edmonton-luxury-watches": {
-    name: "Edmonton",
-    slug: "edmonton-luxury-watches",
-    city: "Edmonton",
-    province: "Alberta",
-    phone: "(780) 555-0789",
-    email: "edmonton@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Edmonton and Northern Alberta with trusted luxury watch buying and selling services.",
-    seoContent: `Edmonton and Northern Alberta collectors now have access to Calgary ETZ's trusted luxury watch services. We buy, sell, and trade pre-owned timepieces from prestigious brands including Rolex, Patek Philippe, Audemars Piguet, Omega, and Breitling.
-
-Our Edmonton services extend throughout the capital region including St. Albert, Sherwood Park, Spruce Grove, Leduc, and Fort Saskatchewan. We also serve collectors in Northern Alberta communities including Fort McMurray, Grande Prairie, and Red Deer.
-
-Every transaction with Calgary ETZ is built on a foundation of honesty and transparency. We provide fair market valuations for watches you wish to sell and authenticate every timepiece we offer for sale. Our goal is to make buying and selling luxury watches as straightforward as possible.
-
-With a proven track record of successful transactions and satisfied customers across Alberta, Calgary ETZ has become a trusted name in the pre-owned luxury watch market. Contact our Edmonton team to discuss buying or selling your next timepiece.`,
-    metaTitle: "Luxury Watches Edmonton | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Edmonton's trusted source for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving Northern Alberta.",
-  },
-  "kelowna-luxury-watches": {
-    name: "Kelowna",
-    slug: "kelowna-luxury-watches",
-    city: "Kelowna",
-    province: "British Columbia",
-    phone: "(250) 555-0321",
-    email: "kelowna@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Kelowna and the Okanagan Valley with authenticated luxury watch buying and selling.",
-    seoContent: `The Okanagan Valley now has access to Calgary ETZ's trusted luxury watch services. Based in Kelowna, we serve collectors throughout British Columbia's interior including Vernon, Penticton, Kamloops, and the surrounding wine country communities.
-
-We specialize in pre-owned luxury timepieces from the world's most respected brands: Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and Tag Heuer. Whether you're a long-time collector or purchasing your first luxury watch, our team provides knowledgeable guidance and fair pricing.
-
-Calgary ETZ's authentication process ensures every watch we sell meets our standards for condition and originality. When you sell to us, you receive a competitive offer based on current market values and the specific condition of your timepiece.
-
-Our Kelowna services make it convenient for Okanagan residents to buy and sell luxury watches without traveling to Vancouver. Contact us today to learn more about our inventory or to receive a quote on your watch.`,
-    metaTitle: "Luxury Watches Kelowna | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Kelowna and Okanagan Valley's source for pre-owned Rolex, Patek Philippe, Audemars Piguet watches. Buy, sell, or trade with Calgary ETZ.",
-  },
-  "montreal-luxury-watches": {
-    name: "Montreal",
-    slug: "montreal-luxury-watches",
-    city: "Montreal",
-    province: "Quebec",
-    phone: "(514) 555-1000",
-    email: "montreal@calgaryetz.com",
-    description:
-      "Calgary ETZ brings trusted luxury watch services to Montreal and Quebec, offering authentication and fair pricing.",
-    seoContent: `Montreal collectors can now access Calgary ETZ's trusted luxury watch buying and selling services. We bring the same commitment to authenticity and fair dealing that has built our reputation in Western Canada to Quebec's largest city.
-
-Our Montreal services cover the Greater Montreal Area including Laval, Longueuil, Brossard, and the West Island communities. We specialize in prestigious Swiss timepieces from Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and Vacheron Constantin.
-
-Montreal has a rich tradition of watch collecting, and Calgary ETZ is proud to serve this community. Whether you're looking to acquire a classic Datejust, a sporty Submariner, or a complicated Patek Philippe, our team can help you find the right timepiece at a fair price.
-
-We also purchase watches from Montreal collectors, offering competitive quotes based on current market conditions. Every transaction is handled professionally, with clear communication and no hidden fees. Contact Calgary ETZ Montreal to discuss your luxury watch needs.`,
-    metaTitle: "Luxury Watches Montreal | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Montreal's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving Greater Montreal.",
-  },
-  "winnipeg-luxury-watches": {
-    name: "Winnipeg",
-    slug: "winnipeg-luxury-watches",
-    city: "Winnipeg",
-    province: "Manitoba",
-    phone: "(204) 555-0555",
-    email: "winnipeg@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Winnipeg and Manitoba with authenticated luxury watch buying, selling, and trading services.",
-    seoContent: `Winnipeg and Manitoba collectors now have local access to Calgary ETZ's trusted luxury watch services. We buy, sell, and trade pre-owned timepieces from the world's most respected watchmakers including Rolex, Patek Philippe, Audemars Piguet, Omega, and Breitling.
-
-Our Winnipeg services extend throughout Manitoba, serving collectors in Brandon, Steinbach, and communities across the prairies. We understand the prairie market and work to make luxury watch transactions as convenient as possible for our Manitoba clients.
-
-Calgary ETZ has built its reputation on straightforward dealing and authentic products. Every watch we sell is thoroughly inspected and authenticated. When you sell to us, you receive a fair offer based on the current market value of your timepiece.
-
-Whether you're celebrating a milestone with a new watch or looking to sell a piece from your collection, Calgary ETZ Winnipeg is here to help. Contact us today for a no-obligation quote or to inquire about our current inventory.`,
-    metaTitle: "Luxury Watches Winnipeg | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Winnipeg's trusted source for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving all of Manitoba.",
+      "Toronto's source for authenticated pre-owned Rolex, Patek Philippe, Audemars Piguet & more. Buy, sell, or trade luxury watches with Exclusive Time Zone.",
   },
 }
 
@@ -155,6 +95,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
+async function getFeaturedWatches() {
+  const watches = await prisma.inventory.findMany({
+    where: { status: "Available" },
+    take: 4,
+    orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+  })
+
+  return watches.map((w) => ({
+    ...w,
+    price: w.price.toNumber(),
+    createdAt: w.createdAt.toISOString(),
+    updatedAt: w.updatedAt.toISOString(),
+  }))
+}
+
 export default async function LocationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const location = locationData[slug]
@@ -163,7 +118,7 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
     notFound()
   }
 
-  const featuredWatches = watches.filter((w) => w.status === "Available").slice(0, 4)
+  const featuredWatches = await getFeaturedWatches()
 
   return (
     <main className="min-h-screen bg-background">

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Facebook, Instagram } from "lucide-react"
+import { Instagram } from "lucide-react"
 
 const quickLinks = [
   { name: "Inventory", href: "/inventory" },
@@ -14,8 +14,7 @@ const quickLinks = [
 const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Richard Mille"]
 
 const socialLinks = [
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com/marketplace" },
-  { name: "Instagram", icon: Instagram, href: "#" },
+  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/exclusivetimezone/" },
 ]
 
 export function Footer() {
@@ -28,7 +27,7 @@ export function Footer() {
             <Link href="/" className="inline-block">
               <Image
                 src="/images/calgary-20etz-20logo-20gold.avif"
-                alt="Opulent ETZ"
+                alt="Exclusive Time Zone"
                 width={160}
                 height={45}
                 className="h-10 w-auto"
@@ -53,12 +52,12 @@ export function Footer() {
               ))}
             </div>
             <a
-              href="https://facebook.com/marketplace"
+              href="https://www.instagram.com/exclusivetimezone/"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-4 text-xs text-gold hover:text-gold/80 transition-colors"
             >
-              Check our Reputation on Facebook Marketplace →
+              Follow us on Instagram →
             </a>
           </div>
 
@@ -98,10 +97,15 @@ export function Footer() {
             <h3 className="font-medium text-sm uppercase tracking-wider mb-4">Contact Us</h3>
             <div className="space-y-3 text-sm text-gray-400">
               <p>Serving all of Canada</p>
-              <p>Calgary • Toronto • Vancouver</p>
+              <p>Vancouver • Calgary • Toronto</p>
               <p className="pt-2">
-                <a href="mailto:info@opulentz.com" className="hover:text-gold transition-colors">
-                  info@opulentz.com
+                <a href="tel:236-334-3434" className="hover:text-gold transition-colors block">
+                  236-334-3434
+                </a>
+              </p>
+              <p>
+                <a href="mailto:info@exclusivetimezone.com" className="hover:text-gold transition-colors">
+                  info@exclusivetimezone.com
                 </a>
               </p>
             </div>
@@ -111,9 +115,9 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-500">© {new Date().getFullYear()} Opulent ETZ. All rights reserved.</p>
+            <p className="text-xs text-gray-500">© {new Date().getFullYear()} Exclusive Time Zone. All rights reserved.</p>
             <p className="text-xs text-gray-500 text-center md:text-right max-w-xl">
-              Opulent ETZ is an independent watch dealer and is not affiliated with Rolex, Audemars Piguet, Patek
+              Exclusive Time Zone is an independent dealer and is not affiliated with Rolex, Audemars Piguet, Patek
               Philippe, or any other brand. All trademarks are property of their respective owners.
             </p>
           </div>
