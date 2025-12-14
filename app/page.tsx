@@ -2,7 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Shield, Award, RefreshCw, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { WatchCard } from "@/components/watch-card"
+import { HomeInventory } from "@/components/home-inventory"
 import { getInventory } from "@/lib/actions"
 
 const valueProps = [
@@ -30,7 +30,6 @@ const valueProps = [
 
 export default async function HomePage() {
   const inventory = await getInventory()
-  const featuredWatches = inventory.filter((w) => w.featured).slice(0, 4)
 
   return (
     <div>
@@ -54,7 +53,7 @@ export default async function HomePage() {
             </h1>
             <p className="mt-6 text-lg text-gray-300 leading-relaxed max-w-xl">
               Discover our curated collection of authenticated pre-owned luxury watches. From Rolex to Patek Philippe,
-              each piece tells a story of craftsmanship and heritage.
+              each piece tells a story of craftsmanship and heritage — including Audemars Piguet, Omega, Cartier, and Tudor.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Button asChild size="lg" className="bg-gold hover:bg-gold/90 text-black font-medium">
@@ -93,26 +92,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Inventory */}
+      {/* Inventory */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Featured</p>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold">Exceptional Timepieces</h2>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Inventory</p>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold">Available Watches</h2>
+              <p className="text-muted-foreground mt-2">Browse our current inventory of authenticated luxury watches.</p>
             </div>
-            <Button asChild variant="outline" className="w-fit bg-transparent">
-              <Link href="/inventory">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredWatches.map((watch) => (
-              <WatchCard key={watch.id} watch={watch} />
-            ))}
-          </div>
+          <HomeInventory watches={inventory} />
         </div>
       </section>
 

@@ -11,7 +11,7 @@ const quickLinks = [
   { name: "Terms of Service", href: "/terms" },
 ]
 
-const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Richard Mille"]
+const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Tudor", "Richard Mille"]
 
 const socialLinks = [
   { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/exclusivetimezone/" },
@@ -97,7 +97,7 @@ export function Footer() {
             <h3 className="font-medium text-sm uppercase tracking-wider mb-4">Contact Us</h3>
             <div className="space-y-3 text-sm text-gray-400">
               <p>Serving all of Canada</p>
-              <p>Vancouver • Calgary • Toronto</p>
+              <p>Kelowna • Calgary • Edmonton • Winnipeg • Toronto • Montreal</p>
               <p className="pt-2">
                 <a href="tel:236-334-3434" className="hover:text-gold transition-colors block">
                   236-334-3434
@@ -118,7 +118,7 @@ export function Footer() {
             <p className="text-xs text-gray-500">© {new Date().getFullYear()} Exclusive Time Zone. All rights reserved.</p>
             <p className="text-xs text-gray-500 text-center md:text-right max-w-xl">
               Exclusive Time Zone is an independent dealer and is not affiliated with Rolex, Audemars Piguet, Patek
-              Philippe, or any other brand. All trademarks are property of their respective owners.
+              Philippe, or any other brand. All trademarks are property of their respective owners. All prices are listed in CAD.
             </p>
           </div>
         </div>

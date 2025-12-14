@@ -1,3 +1,5 @@
+import { buildStandardProductDescription } from "@/lib/formatters"
+
 export interface Watch {
   id: string
   brand: string
@@ -23,6 +25,9 @@ export interface Watch {
   bracelet?: string
 }
 
+const standardDescription = (year: number, reference: string, condition: string, boxAndPapers: boolean) =>
+  buildStandardProductDescription({ year, reference, condition, boxAndPapers })
+
 export const watches: Watch[] = [
   {
     id: "1",
@@ -34,8 +39,7 @@ export const watches: Watch[] = [
     price: 14500,
     status: "Available",
     boxAndPapers: true,
-    description:
-      "The Rolex Submariner Date in Oystersteel with a black Cerachrom bezel. Complete set with box and papers.",
+    description: standardDescription(2023, "126610LN", "Excellent", true),
     images: ["/rolex-submariner-luxury-watch-black-dial-steel-bra.jpg"],
     slug: "rolex-submariner-126610ln",
     featured: true,
@@ -55,8 +59,7 @@ export const watches: Watch[] = [
     price: 125000,
     status: "Available",
     boxAndPapers: true,
-    description:
-      "The iconic Patek Philippe Nautilus with blue gradient dial. Discontinued reference, highly sought after.",
+    description: standardDescription(2021, "5711/1A-010", "Excellent", true),
     images: ["/patek-philippe-nautilus-blue-dial-steel-watch.jpg"],
     slug: "patek-philippe-nautilus-5711-1a-010",
     featured: true,
@@ -76,7 +79,7 @@ export const watches: Watch[] = [
     price: 42000,
     status: "Pending",
     boxAndPapers: true,
-    description: "Audemars Piguet Royal Oak Selfwinding with blue dial. Iconic Grande Tapisserie pattern.",
+    description: standardDescription(2022, "15500ST.OO.1220ST.01", "Very Good", true),
     images: ["/audemars-piguet-royal-oak-blue-dial-steel-watch.jpg"],
     slug: "audemars-piguet-royal-oak-15500st",
     featured: true,
@@ -96,7 +99,7 @@ export const watches: Watch[] = [
     price: 7200,
     status: "Available",
     boxAndPapers: true,
-    description: "The legendary Omega Speedmaster Professional. The only watch worn on the moon.",
+    description: standardDescription(2023, "310.30.42.50.01.001", "Excellent", true),
     images: ["/omega-speedmaster-moonwatch-black-dial-chronograph.jpg"],
     slug: "omega-speedmaster-moonwatch-310-30",
     featured: true,
@@ -116,7 +119,7 @@ export const watches: Watch[] = [
     price: 32000,
     status: "Sold",
     boxAndPapers: true,
-    description: "Rolex Cosmograph Daytona with white dial and Cerachrom bezel. The ultimate racing chronograph.",
+    description: standardDescription(2022, "116500LN", "Excellent", true),
     images: ["/rolex-daytona-white-dial-steel-chronograph-watch.jpg"],
     slug: "rolex-daytona-116500ln",
     featured: false,
@@ -136,7 +139,7 @@ export const watches: Watch[] = [
     price: 19500,
     status: "Available",
     boxAndPapers: true,
-    description: "The iconic Pepsi GMT-Master II on Jubilee bracelet. Perfect for world travelers.",
+    description: standardDescription(2023, "126710BLRO", "Excellent", true),
     images: ["/rolex-gmt-master-ii-pepsi-bezel-jubilee-bracelet.jpg"],
     slug: "rolex-gmt-master-ii-126710blro",
     featured: false,
@@ -156,7 +159,7 @@ export const watches: Watch[] = [
     price: 38000,
     status: "Available",
     boxAndPapers: true,
-    description: "Patek Philippe Calatrava in white gold. The epitome of dress watch elegance.",
+    description: standardDescription(2021, "5227G-010", "Excellent", true),
     images: ["/patek-philippe-calatrava-white-gold-dress-watch.jpg"],
     slug: "patek-philippe-calatrava-5227g-010",
     featured: false,
@@ -176,7 +179,7 @@ export const watches: Watch[] = [
     price: 5800,
     status: "Available",
     boxAndPapers: true,
-    description: "Omega Seamaster Diver 300M with black ceramic dial. Professional diving capability.",
+    description: standardDescription(2022, "210.30.42.20.01.001", "Very Good", true),
     images: ["/omega-seamaster-300-black-dial-diver-watch.jpg"],
     slug: "omega-seamaster-300-210-30",
     featured: false,
@@ -196,7 +199,7 @@ export const watches: Watch[] = [
     price: 8500,
     status: "Pending",
     boxAndPapers: true,
-    description: "Cartier Santos de Cartier medium model. The first pilot's watch, a design icon.",
+    description: standardDescription(2023, "WSSA0018", "Excellent", true),
     images: ["/cartier-santos-silver-dial-steel-watch.jpg"],
     slug: "cartier-santos-wssa0018",
     featured: false,
@@ -216,7 +219,7 @@ export const watches: Watch[] = [
     price: 185000,
     status: "Available",
     boxAndPapers: true,
-    description: "Richard Mille RM 011 Felipe Massa in titanium. Ultimate haute horlogerie sports watch.",
+    description: standardDescription(2020, "RM011-FM", "Excellent", true),
     images: ["/richard-mille-rm011-skeleton-titanium-watch.jpg"],
     slug: "richard-mille-rm011-fm",
     featured: false,
@@ -236,7 +239,7 @@ export const watches: Watch[] = [
     price: 28000,
     status: "Available",
     boxAndPapers: false,
-    description: "Audemars Piguet Royal Oak Offshore Chronograph. Bold sports luxury design.",
+    description: standardDescription(2019, "26470ST.OO.A027CA.01", "Good", false),
     images: ["/audemars-piguet-royal-oak-offshore-blue-chronograp.jpg"],
     slug: "audemars-piguet-royal-oak-offshore-26470st",
     featured: false,
@@ -256,7 +259,7 @@ export const watches: Watch[] = [
     price: 12500,
     status: "Available",
     boxAndPapers: true,
-    description: "Rolex Datejust 41 with blue dial and fluted bezel on Jubilee bracelet.",
+    description: standardDescription(2023, "126334", "Excellent", true),
     images: ["/rolex-datejust-41-blue-dial-fluted-bezel-jubilee.jpg"],
     slug: "rolex-datejust-41-126334",
     featured: false,
@@ -268,6 +271,6 @@ export const watches: Watch[] = [
   },
 ]
 
-export const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Richard Mille"]
+export const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Tudor", "Richard Mille"]
 export const conditions = ["Unworn", "Excellent", "Very Good", "Good"]
 export const statuses = ["Available", "Pending", "Sold"]

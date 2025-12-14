@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Phone, Mail, Shield, Award, Clock } from "lucide-reac
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { buildStandardProductDescription, buildStandardProductDescriptionInline, formatCadPrice } from "@/lib/formatters"
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
 
@@ -57,7 +58,12 @@ export async function generateMetadata({
   }
 
   const title = `${watch.brand} ${watch.model} ${watch.reference} | Exclusive Time Zone`
-  const description = `${watch.year} ${watch.brand} ${watch.model} (Ref. ${watch.reference}) in ${watch.condition} condition. ${watch.boxAndPapers ? "Complete with box and papers." : ""} Available at Exclusive Time Zone.`
+  const description = buildStandardProductDescriptionInline({
+    year: watch.year,
+    reference: watch.reference,
+    condition: watch.condition,
+    boxAndPapers: watch.boxAndPapers,
+  })
 
   return {
     title,
@@ -83,14 +89,6 @@ export default async function WatchDetailPage({
   }
 
   const relatedWatches = await getRelatedWatches(watch.brand, slug)
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-CA", {
-      style: "currency",
-      currency: "CAD",
-      maximumFractionDigits: 0,
-    }).format(price)
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -139,7 +137,7 @@ export default async function WatchDetailPage({
               </Badge>
               {watch.boxAndPapers && (
                 <Badge className="absolute top-4 right-4 bg-gold text-black">
-                  Box & Papers
+                  Complete Set
                 </Badge>
               )}
             </div>
@@ -179,10 +177,10 @@ export default async function WatchDetailPage({
             <div className="border-y border-border py-6">
               <p className="text-sm text-muted-foreground mb-1">Price</p>
               <p className="font-serif text-4xl font-bold text-gold">
-                {formatPrice(watch.price)}
+                {formatCadPrice(watch.price)}
               </p>
               <p className="text-xs text-muted-foreground mt-2">
-                CAD • Price includes authentication & service
+                All pricing in CAD • Price includes authentication & service
               </p>
             </div>
 
@@ -197,12 +195,12 @@ export default async function WatchDetailPage({
                 <p className="font-medium text-lg">{watch.condition}</p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">Box & Papers</p>
+                <p className="text-sm text-muted-foreground">Set</p>
                 <p className="font-medium text-lg flex items-center gap-2">
                   {watch.boxAndPapers ? (
                     <>
                       <Check className="h-4 w-4 text-green-500" />
-                      Complete Set
+                      Complete Set w/ Box and Papers
                     </>
                   ) : (
                     "Watch Only"
@@ -219,7 +217,12 @@ export default async function WatchDetailPage({
             <div>
               <h2 className="font-serif text-xl font-medium mb-3">Description</h2>
               <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
-                {watch.description}
+                {buildStandardProductDescription({
+                  year: watch.year,
+                  reference: watch.reference,
+                  condition: watch.condition,
+                  boxAndPapers: watch.boxAndPapers,
+                })}
               </p>
             </div>
 
@@ -269,7 +272,7 @@ export default async function WatchDetailPage({
             </h2>
             <div className="grid sm:grid-cols-3 gap-6 text-center">
               <div>
-                <h3 className="font-medium mb-2">Vancouver HQ</h3>
+                <h3 className="font-medium mb-2">Vancouver</h3>
                 <p className="text-sm text-muted-foreground mb-1">
                   943 W Broadway, Unit 110
                 </p>
@@ -332,7 +335,7 @@ export default async function WatchDetailPage({
                       <h3 className="font-serif text-lg font-medium mt-1 group-hover:text-gold transition-colors">
                         {relatedWatch.model}
                       </h3>
-                      <p className="font-medium mt-2">{formatPrice(relatedWatch.price)}</p>
+                      <p className="font-medium mt-2">{formatCadPrice(relatedWatch.price)}</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -344,4 +347,3 @@ export default async function WatchDetailPage({
     </div>
   )
 }
-

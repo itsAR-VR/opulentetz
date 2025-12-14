@@ -1,11 +1,12 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Shield, Award, Users, Clock } from "lucide-react"
 
 export const metadata = {
-  title: "About Us | Calgary ETZ - Trusted Luxury Watch Dealer",
+  title: "About Us | Exclusive Time Zone (ETZ)",
   description:
-    "Learn about Calgary ETZ, Canada's trusted source for pre-owned luxury watches. Exceptional service and competitive pricing.",
+    "Learn about Exclusive Time Zone (ETZ), Canada's trusted destination for luxury watch buying, selling, consignment, and trade-ups.",
 }
 
 const values = [
@@ -42,8 +43,18 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-black text-white py-16 lg:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative py-20 bg-black text-white overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/luxury-watch-workshop-dark-moody.jpg"
+            alt="Luxury watch workshop"
+            fill
+            className="object-cover opacity-30"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-medium mb-4">About Us</h1>
           <p className="text-gray-400">Your trusted destination for luxury timepieces</p>
         </div>
@@ -55,22 +66,22 @@ export default function AboutPage() {
           <h2 className="font-serif text-2xl font-medium text-gold mb-6">Company Profile</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              <strong className="text-foreground">Calgary ETZ</strong> was founded on a profound admiration for luxury
-              timepieces. With access to a vast network of global wholesalers, authorized dealers, and secondary market
-              specialists, we offer our clients an unrivaled selection of exquisite watches, paired with exceptional
-              service and competitive pricing.
+              <strong className="text-foreground">Exclusive Time Zone (ETZ)</strong> was founded on a profound admiration
+              for luxury timepieces. With access to a vast network of global wholesalers, authorized dealers, and
+              secondary market specialists, we offer our clients an unrivaled selection of exquisite watches, paired
+              with exceptional service and competitive pricing.
             </p>
             <p>
-              At <strong className="text-foreground">Calgary ETZ</strong>, our mission is to be the trusted destination
-              for buying, selling, or trading both new and pre-owned luxury watches. We are dedicated to providing a
-              positive, transparent, and secure experience for every client.
+              At <strong className="text-foreground">ETZ</strong>, our mission is to be the trusted destination for
+              buying, selling, consigning, and trading luxury watches. We are dedicated to providing a positive,
+              transparent, and secure experience for every client.
             </p>
             <p>
               Each timepiece in our collection is meticulously inspected and authenticated by expert watchmakers, and
               when necessary, carefully serviced and restored to meet our stringent quality standards.{" "}
-              <strong className="text-foreground">Calgary ETZ</strong> guarantees the complete authenticity of all
-              products upon delivery and recommends that all watches be exclusively serviced by the manufacturer's
-              approved watchmakers.
+              <strong className="text-foreground">ETZ</strong> guarantees the complete authenticity of all products upon
+              delivery and recommends that all watches be exclusively serviced by the manufacturer's approved
+              watchmakers.
             </p>
           </div>
         </div>
@@ -84,14 +95,14 @@ export default function AboutPage() {
             <p>
               <strong className="text-foreground">Call or Text:</strong> Monday to Friday 10AM - 6PM, Saturday 11AM -
               4PM MST at{" "}
-              <a href="tel:+14035550123" className="text-gold hover:underline">
-                (403) 555-0123
+              <a href="tel:236-334-3434" className="text-gold hover:underline">
+                236-334-3434
               </a>
             </p>
             <p>
               <strong className="text-foreground">Email:</strong>{" "}
-              <a href="mailto:info@calgaryetz.com" className="text-gold hover:underline">
-                info@calgaryetz.com
+              <a href="mailto:info@exclusivetimezone.com" className="text-gold hover:underline">
+                info@exclusivetimezone.com
               </a>
             </p>
             <p>

@@ -134,12 +134,12 @@ Type: ${data.transactionType === "sell" ? "Sell" : "Trade"}
 Watch Details:
 - Brand: ${data.brand}
 - Model: ${data.model}
-- Reference: ${data.reference || "Not provided"}
-- Year: ${data.year || "Not provided"}
-- Condition: ${data.condition}
-- Box & Papers: ${data.hasBoxPapers === "yes" ? "Yes" : data.hasBoxPapers === "partial" ? "Partial" : "No"}
+	- Reference: ${data.reference || "Not provided"}
+	- Year: ${data.year || "Not provided"}
+	- Condition: ${data.condition}
+	- Set: ${data.hasBoxPapers === "yes" ? "Yes" : data.hasBoxPapers === "partial" ? "Partial" : "No"}
 
-Contact Information:
+	Contact Information:
 - Name: ${data.firstName} ${data.lastName}
 - Email: ${data.email}
 - Phone: ${data.phone || "Not provided"}
@@ -172,4 +172,3 @@ View in dashboard: ${process.env.NEXT_PUBLIC_SITE_URL || "https://exclusivetimez
     console.error("Error sending email notification:", error)
   }
 }
-

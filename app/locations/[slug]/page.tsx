@@ -1,5 +1,7 @@
-import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
+import { notFound } from "next/navigation"
 import { WatchCard } from "@/components/watch-card"
 import { Button } from "@/components/ui/button"
 import { watches } from "@/lib/mock-data"
@@ -15,128 +17,103 @@ interface LocationData {
   seoContent: string
   metaTitle: string
   metaDescription: string
+  heroImage: string
+  heroAlt: string
 }
 
+const CONTACT_PHONE = "236-334-3434"
+const CONTACT_EMAIL = "info@exclusivetimezone.com"
+
 const locationData: Record<string, LocationData> = {
-  "calgary-luxury-watches": {
-    name: "Calgary",
-    slug: "calgary-luxury-watches",
-    city: "Calgary",
+  "edmonton-luxury-watches": {
+    name: "Edmonton",
+    slug: "edmonton-luxury-watches",
+    city: "Edmonton",
     province: "Alberta",
-    phone: "(403) 555-0123",
-    email: "calgary@calgaryetz.com",
-    description:
-      "Calgary ETZ is your trusted source for buying and selling pre-owned luxury watches in Calgary, Alberta.",
-    seoContent: `As Calgary's premier destination for pre-owned luxury timepieces, Calgary ETZ has built a reputation for authenticity, fair pricing, and exceptional customer service. We specialize in sought-after brands including Rolex, Patek Philippe, Audemars Piguet, Omega, and Cartier.
-
-Whether you're looking to purchase your first luxury watch, add to an existing collection, or sell a timepiece you no longer wear, our team provides honest assessments and competitive offers. Every watch we sell undergoes thorough authentication to ensure you receive exactly what you're paying for.
-
-We serve collectors throughout Calgary and surrounding areas including Airdrie, Cochrane, Okotoks, and Chestermere. Our process is simple: contact us with details about your watch, receive a fair quote, and complete your transaction with confidence.
-
-Calgary ETZ is proud to maintain a 5-star reputation on Facebook Marketplace with hundreds of successful transactions. We believe in transparency, fair dealing, and building long-term relationships with collectors across Alberta.`,
-    metaTitle: "Luxury Watches Calgary | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "ETZ is Edmonton’s trusted luxury watch buyer and consignment specialist.",
+    seoContent: `ETZ is Edmonton’s trusted luxury watch buyer and consignment specialist. Operating locally out of Edmonton, we help clients buy, sell, consign, and trade watches with transparent CAD payouts and secure transactions available Canada‑wide. Whether you want to turn your watch into cash, place it on consignment, or request a trade‑up into something more exclusive, ETZ makes the process simple and discreet. If you’re searching “sell my watch Edmonton,” “watch consignment Edmonton,” or “trade my Rolex Edmonton,” ETZ is your go‑to partner for fair valuations and fast results.`,
+    metaTitle: "Sell My Watch Edmonton | Luxury Watch Buyer & Consignment | ETZ",
     metaDescription:
-      "Calgary's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet, Omega & Cartier watches. Buy, sell, or trade with confidence. 5-star rated.",
+      "Sell, consign, or trade luxury watches in Edmonton with transparent CAD payouts and secure Canada‑wide transactions. ETZ makes it simple and discreet.",
+    heroImage: "/edmonton-downtown-skyline-river-valley.jpg",
+    heroAlt: "Edmonton skyline",
   },
   "toronto-luxury-watches": {
     name: "Toronto",
     slug: "toronto-luxury-watches",
     city: "Toronto",
     province: "Ontario",
-    phone: "(416) 555-0456",
-    email: "toronto@calgaryetz.com",
-    description:
-      "Calgary ETZ brings trusted luxury watch buying and selling services to Toronto and the Greater Toronto Area.",
-    seoContent: `Calgary ETZ now serves Toronto and the Greater Toronto Area, bringing our reputation for authenticity and fair dealing to Ontario's largest city. We specialize in pre-owned luxury watches from brands including Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and IWC.
-
-Toronto collectors can expect the same high standards that have made Calgary ETZ a trusted name in Western Canada. Every watch is authenticated by experienced professionals, and we provide detailed condition reports for complete transparency.
-
-We work with clients across the GTA including Mississauga, Brampton, Markham, Vaughan, Richmond Hill, and Oakville. Whether you're buying your first Submariner or selling a vintage Daytona, our team is ready to assist.
-
-Our commitment to fair pricing means we research current market values to ensure competitive offers on watches we purchase and reasonable prices on watches we sell. Contact us today to discuss your luxury watch needs in Toronto.`,
-    metaTitle: "Luxury Watches Toronto | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "ETZ operates in Toronto as a leading service for buying, selling, and consigning luxury watches.",
+    seoContent: `ETZ operates in Toronto as a leading service for buying, selling, and consigning luxury watches, with deals completed safely across Canada. From our Toronto base, we offer competitive cash offers, flexible consignment programs, and trade‑up options for clients looking to upgrade their pieces. Toronto residents searching “sell my watch Toronto,” “watch consignment Toronto,” or “trade my Rolex Toronto” choose ETZ for accurate market pricing in CAD, secure payment methods, and a streamlined process designed for both collectors and first‑time sellers.`,
+    metaTitle: "Sell My Watch Toronto | Luxury Watch Buyer & Consignment | ETZ",
     metaDescription:
-      "Toronto's source for authenticated pre-owned Rolex, Patek Philippe, Audemars Piguet & more. Buy, sell, or trade luxury watches with Calgary ETZ.",
-  },
-  "edmonton-luxury-watches": {
-    name: "Edmonton",
-    slug: "edmonton-luxury-watches",
-    city: "Edmonton",
-    province: "Alberta",
-    phone: "(780) 555-0789",
-    email: "edmonton@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Edmonton and Northern Alberta with trusted luxury watch buying and selling services.",
-    seoContent: `Edmonton and Northern Alberta collectors now have access to Calgary ETZ's trusted luxury watch services. We buy, sell, and trade pre-owned timepieces from prestigious brands including Rolex, Patek Philippe, Audemars Piguet, Omega, and Breitling.
-
-Our Edmonton services extend throughout the capital region including St. Albert, Sherwood Park, Spruce Grove, Leduc, and Fort Saskatchewan. We also serve collectors in Northern Alberta communities including Fort McMurray, Grande Prairie, and Red Deer.
-
-Every transaction with Calgary ETZ is built on a foundation of honesty and transparency. We provide fair market valuations for watches you wish to sell and authenticate every timepiece we offer for sale. Our goal is to make buying and selling luxury watches as straightforward as possible.
-
-With a proven track record of successful transactions and satisfied customers across Alberta, Calgary ETZ has become a trusted name in the pre-owned luxury watch market. Contact our Edmonton team to discuss buying or selling your next timepiece.`,
-    metaTitle: "Luxury Watches Edmonton | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Edmonton's trusted source for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving Northern Alberta.",
-  },
-  "kelowna-luxury-watches": {
-    name: "Kelowna",
-    slug: "kelowna-luxury-watches",
-    city: "Kelowna",
-    province: "British Columbia",
-    phone: "(250) 555-0321",
-    email: "kelowna@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Kelowna and the Okanagan Valley with authenticated luxury watch buying and selling.",
-    seoContent: `The Okanagan Valley now has access to Calgary ETZ's trusted luxury watch services. Based in Kelowna, we serve collectors throughout British Columbia's interior including Vernon, Penticton, Kamloops, and the surrounding wine country communities.
-
-We specialize in pre-owned luxury timepieces from the world's most respected brands: Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and Tag Heuer. Whether you're a long-time collector or purchasing your first luxury watch, our team provides knowledgeable guidance and fair pricing.
-
-Calgary ETZ's authentication process ensures every watch we sell meets our standards for condition and originality. When you sell to us, you receive a competitive offer based on current market values and the specific condition of your timepiece.
-
-Our Kelowna services make it convenient for Okanagan residents to buy and sell luxury watches without traveling to Vancouver. Contact us today to learn more about our inventory or to receive a quote on your watch.`,
-    metaTitle: "Luxury Watches Kelowna | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Kelowna and Okanagan Valley's source for pre-owned Rolex, Patek Philippe, Audemars Piguet watches. Buy, sell, or trade with Calgary ETZ.",
-  },
-  "montreal-luxury-watches": {
-    name: "Montreal",
-    slug: "montreal-luxury-watches",
-    city: "Montreal",
-    province: "Quebec",
-    phone: "(514) 555-1000",
-    email: "montreal@calgaryetz.com",
-    description:
-      "Calgary ETZ brings trusted luxury watch services to Montreal and Quebec, offering authentication and fair pricing.",
-    seoContent: `Montreal collectors can now access Calgary ETZ's trusted luxury watch buying and selling services. We bring the same commitment to authenticity and fair dealing that has built our reputation in Western Canada to Quebec's largest city.
-
-Our Montreal services cover the Greater Montreal Area including Laval, Longueuil, Brossard, and the West Island communities. We specialize in prestigious Swiss timepieces from Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, and Vacheron Constantin.
-
-Montreal has a rich tradition of watch collecting, and Calgary ETZ is proud to serve this community. Whether you're looking to acquire a classic Datejust, a sporty Submariner, or a complicated Patek Philippe, our team can help you find the right timepiece at a fair price.
-
-We also purchase watches from Montreal collectors, offering competitive quotes based on current market conditions. Every transaction is handled professionally, with clear communication and no hidden fees. Contact Calgary ETZ Montreal to discuss your luxury watch needs.`,
-    metaTitle: "Luxury Watches Montreal | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
-    metaDescription:
-      "Montreal's trusted dealer for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving Greater Montreal.",
+      "Sell, consign, or trade luxury watches in Toronto with accurate CAD pricing, secure payments, and a streamlined process for collectors and first‑time sellers.",
+    heroImage: "/toronto-downtown-cn-tower-luxury.jpg",
+    heroAlt: "Toronto skyline",
   },
   "winnipeg-luxury-watches": {
     name: "Winnipeg",
     slug: "winnipeg-luxury-watches",
     city: "Winnipeg",
     province: "Manitoba",
-    phone: "(204) 555-0555",
-    email: "winnipeg@calgaryetz.com",
-    description:
-      "Calgary ETZ serves Winnipeg and Manitoba with authenticated luxury watch buying, selling, and trading services.",
-    seoContent: `Winnipeg and Manitoba collectors now have local access to Calgary ETZ's trusted luxury watch services. We buy, sell, and trade pre-owned timepieces from the world's most respected watchmakers including Rolex, Patek Philippe, Audemars Piguet, Omega, and Breitling.
-
-Our Winnipeg services extend throughout Manitoba, serving collectors in Brandon, Steinbach, and communities across the prairies. We understand the prairie market and work to make luxury watch transactions as convenient as possible for our Manitoba clients.
-
-Calgary ETZ has built its reputation on straightforward dealing and authentic products. Every watch we sell is thoroughly inspected and authenticated. When you sell to us, you receive a fair offer based on the current market value of your timepiece.
-
-Whether you're celebrating a milestone with a new watch or looking to sell a piece from your collection, Calgary ETZ Winnipeg is here to help. Contact us today for a no-obligation quote or to inquire about our current inventory.`,
-    metaTitle: "Luxury Watches Winnipeg | Buy & Sell Rolex, Patek Philippe, Audemars Piguet | Calgary ETZ",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "ETZ brings expert watch buying and consignment services to Winnipeg with Canada‑wide reach.",
+    seoContent: `ETZ brings expert watch buying and consignment services to Winnipeg with Canada‑wide reach. Operating out of Winnipeg, we specialize in evaluating luxury watches, offering strong cash payouts, and managing consignment listings to maximize your return. You can also request a trade‑up, moving into a more exclusive piece while using your current watch as value. If you’re searching “sell my watch Winnipeg,” “watch buyer Winnipeg,” or “watch consignment Winnipeg,” ETZ delivers honest appraisals, transparent fees, and insured shipping options across Canada.`,
+    metaTitle: "Sell My Watch Winnipeg | Luxury Watch Buyer & Consignment | ETZ",
     metaDescription:
-      "Winnipeg's trusted source for pre-owned Rolex, Patek Philippe, Audemars Piguet & Omega watches. Buy, sell, or trade with Calgary ETZ. Serving all of Manitoba.",
+      "Sell, consign, or trade luxury watches in Winnipeg with honest appraisals, transparent fees, strong CAD payouts, and insured Canada‑wide shipping options.",
+    heroImage: "/winnipeg-downtown-portage-exchange-district.jpg",
+    heroAlt: "Winnipeg skyline",
+  },
+  "montreal-luxury-watches": {
+    name: "Montreal",
+    slug: "montreal-luxury-watches",
+    city: "Montreal",
+    province: "Quebec",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "ETZ’s Montreal operation focuses on high‑end watch buying, selling, and consignment.",
+    seoContent: `ETZ’s Montreal operation focuses on high‑end watch buying, selling, and consignment, supporting clients in Quebec and throughout Canada. From Montreal, we provide fair CAD offers for your watch, flexible consignment agreements, and trade‑up opportunities for those looking to move into something more exclusive. Montreal clients searching “vendre ma montre Montréal,” “consignation montres de luxe Montréal,” or “trade Rolex Montréal” trust ETZ for bilingual service, secure payments, and a professional, confidential process from start to finish.`,
+    metaTitle: "Sell My Watch Montreal | Luxury Watch Buyer & Consignment | ETZ",
+    metaDescription:
+      "High‑end watch buying, selling, and consignment in Montreal with bilingual service, fair CAD offers, and a confidential, professional process from start to finish.",
+    heroImage: "/montreal-old-port-downtown-luxury.jpg",
+    heroAlt: "Montreal skyline",
+  },
+  "calgary-luxury-watches": {
+    name: "Calgary",
+    slug: "calgary-luxury-watches",
+    city: "Calgary",
+    province: "Alberta",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "From our Calgary base, ETZ offers a complete watch buying and consignment solution.",
+    seoContent: `From our Calgary base, ETZ offers a complete watch buying and consignment solution for Alberta and the rest of Canada. Calgary clients can sell watches for cash, place pieces on consignment, or request a trade‑up into a more exclusive model, all with transparent CAD valuations and insured logistics. If you’re looking for “sell my watch Calgary,” “watch consignment Calgary,” or “trade my Rolex Calgary,” ETZ provides expert market guidance, competitive offers, and a smooth, hassle‑free experience.`,
+    metaTitle: "Sell My Watch Calgary | Luxury Watch Buyer & Consignment | ETZ",
+    metaDescription:
+      "Sell, consign, or trade luxury watches in Calgary with transparent CAD valuations, insured logistics, and a smooth, hassle‑free experience across Canada.",
+    heroImage: "/calgary-downtown-skyline-luxury.jpg",
+    heroAlt: "Calgary skyline",
+  },
+  "kelowna-luxury-watches": {
+    name: "Kelowna",
+    slug: "kelowna-luxury-watches",
+    city: "Kelowna",
+    province: "British Columbia",
+    phone: CONTACT_PHONE,
+    email: CONTACT_EMAIL,
+    description: "ETZ operates out of Kelowna to serve the Okanagan with specialized watch buying and consignment.",
+    seoContent: `ETZ operates out of Kelowna to serve the Okanagan with specialized watch buying, selling, and consignment services, while handling transactions Canada‑wide. You can sell your watch for cash, consign it to reach serious buyers, or request a trade‑up into a more exclusive piece using your current watch as value. Kelowna residents searching “sell my watch Kelowna,” “watch consignment Kelowna,” or “trade Rolex Kelowna” rely on ETZ for accurate CAD appraisals, secure payments, and personalized support throughout the process.`,
+    metaTitle: "Sell My Watch Kelowna | Luxury Watch Buyer & Consignment | ETZ",
+    metaDescription:
+      "Sell, consign, or trade luxury watches in Kelowna and the Okanagan with accurate CAD appraisals, secure payments, and personalized support Canada‑wide.",
+    heroImage: "/kelowna-okanagan-lake-downtown-luxury.jpg",
+    heroAlt: "Kelowna and Okanagan Lake",
   },
 }
 
@@ -144,7 +121,11 @@ export async function generateStaticParams() {
   return Object.keys(locationData).map((slug) => ({ slug }))
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
   const { slug } = await params
   const location = locationData[slug]
   if (!location) return {}
@@ -152,6 +133,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: location.metaTitle,
     description: location.metaDescription,
+    openGraph: {
+      title: location.metaTitle,
+      description: location.metaDescription,
+      images: [{ url: location.heroImage, alt: location.heroAlt }],
+    },
   }
 }
 
@@ -167,11 +153,31 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
 
   return (
     <main className="min-h-screen bg-background">
-      {/* Simple Header Section */}
-      <section className="py-16 lg:py-20 border-b border-border">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="font-serif text-3xl md:text-4xl font-medium mb-4">Luxury Watches in {location.name}</h1>
-          <p className="text-muted-foreground">{location.description}</p>
+      {/* Hero Section */}
+      <section className="relative py-20 bg-black text-white overflow-hidden">
+        <div className="absolute inset-0">
+          <Image src={location.heroImage} alt={location.heroAlt} fill className="object-cover opacity-35" priority />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-4">
+            {location.city}, {location.province}
+          </p>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-balance">Sell My Watch {location.city}</h1>
+          <p className="mt-6 text-gray-300 leading-relaxed">{location.description}</p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="bg-gold hover:bg-gold/90 text-black font-medium">
+              <Link href="/sell">Get a Quote</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-black bg-transparent"
+            >
+              <Link href="/inventory">Browse Inventory</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -208,10 +214,10 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
           </div>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild className="bg-gold hover:bg-gold/90 text-black font-medium">
-              <Link href="/inventory">Browse Inventory</Link>
+              <Link href="/sell">Sell / Consign</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/sell">Sell Your Watch</Link>
+              <Link href="/inventory">Browse Inventory</Link>
             </Button>
           </div>
         </div>
@@ -222,7 +228,7 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
             <h2 className="font-serif text-2xl font-medium mb-2">Featured Inventory</h2>
-            <p className="text-muted-foreground">Available for pickup or shipping from {location.name}</p>
+            <p className="text-muted-foreground">Available for delivery or shipping across Canada</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredWatches.map((watch) => (
@@ -239,3 +245,4 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
     </main>
   )
 }
+

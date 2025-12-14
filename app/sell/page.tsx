@@ -328,7 +328,7 @@ export default function SellPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label>Box & Papers</Label>
+                      <Label>Set</Label>
                       <RadioGroup
                         value={formData.hasBoxPapers}
                         onValueChange={(value) => handleInputChange("hasBoxPapers", value)}

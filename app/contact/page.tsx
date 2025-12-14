@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -33,7 +34,7 @@ const contactMethods = [
 
 const locations = [
   {
-    name: "Vancouver HQ",
+    name: "Vancouver",
     address: "943 W Broadway, Unit 110, Vancouver, BC V5Z 4E1",
     phone: "236-833-3952",
   },
@@ -72,8 +73,18 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-black text-white py-16 lg:py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative py-20 bg-black text-white overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/luxury-watch-collector-examining-rolex.jpg"
+            alt="Contact Exclusive Time Zone"
+            fill
+            className="object-cover opacity-30"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-medium mb-4">Contact Us</h1>
           <p className="text-gray-400">
             Fill out the form below and we will get back to you as soon as possible.

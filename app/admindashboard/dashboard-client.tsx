@@ -197,7 +197,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                     <Input id="condition" name="condition" placeholder="Excellent" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="price">Price (numeric) *</Label>
+                    <Label htmlFor="price">Price (CAD) *</Label>
                     <Input id="price" name="price" type="number" step="0.01" min="0" required />
                   </div>
                   <div className="space-y-1.5">
@@ -220,7 +220,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
 
                 <div className="flex items-center gap-2">
                   <input id="boxAndPapers" name="boxAndPapers" type="checkbox" defaultChecked className="h-4 w-4" />
-                  <Label htmlFor="boxAndPapers">Box & Papers</Label>
+                  <Label htmlFor="boxAndPapers">Complete Set</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input id="featured" name="featured" type="checkbox" className="h-4 w-4" />
@@ -233,8 +233,14 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="description">Description *</Label>
-                  <Textarea id="description" name="description" rows={4} required />
+                  <Label htmlFor="description">Description (Standard Format) *</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    rows={5}
+                    placeholder={`Year: 2023\nRef: 326934\nCondition: MINT\nSet: Complete Set w/ Box and Papers\nAvailable for purchase from Exclusive Time Zone`}
+                    required
+                  />
                 </div>
 
                 <Button type="submit" disabled={isPending} className="bg-gold text-black hover:bg-gold/90 w-full">
@@ -323,7 +329,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                           <span className="font-medium">{request.condition}</span>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Box & Papers:</span>{" "}
+                          <span className="text-muted-foreground">Set:</span>{" "}
                           <span className="font-medium">{request.boxAndPapers ? "Yes" : "No"}</span>
                         </div>
                         {contact?.reference && (

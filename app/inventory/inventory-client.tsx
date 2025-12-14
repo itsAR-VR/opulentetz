@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Filter, X, Search } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { WatchCard } from "@/components/watch-card"
 import type { InventoryItem } from "@/lib/types/inventory"
@@ -16,21 +17,22 @@ interface InventoryClientProps {
 }
 
 export default function InventoryClient({ watches }: InventoryClientProps) {
+  const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedConditions, setSelectedConditions] = useState<string[]>([])
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
-  const maxPrice = useMemo(() => {
-    if (!watches.length) return 200000
-    return Math.max(...watches.map((w) => w.price))
-  }, [watches])
-
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice])
-
   useEffect(() => {
-    setPriceRange([0, maxPrice])
-  }, [maxPrice])
+    const brandParam = searchParams.get("brand")
+    const conditionParam = searchParams.get("condition")
+    const qParam = searchParams.get("q")
+
+    if (brandParam) setSelectedBrands([brandParam])
+    if (conditionParam) setSelectedConditions([conditionParam])
+    if (qParam) setSearchQuery(qParam)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const brandOptions = useMemo(() => {
     const unique = new Set(watches.map((w) => w.brand))
@@ -54,11 +56,9 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
 
       const matchesCondition = selectedConditions.length === 0 || selectedConditions.includes(watch.condition)
 
-      const matchesPrice = watch.price >= priceRange[0] && watch.price <= priceRange[1]
-
-      return matchesSearch && matchesBrand && matchesCondition && matchesPrice
+      return matchesSearch && matchesBrand && matchesCondition
     })
-  }, [searchQuery, selectedBrands, selectedConditions, priceRange, watches])
+  }, [searchQuery, selectedBrands, selectedConditions, watches])
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands((prev) => (prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]))
@@ -74,23 +74,11 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
     setSearchQuery("")
     setSelectedBrands([])
     setSelectedConditions([])
-    setPriceRange([0, maxPrice])
   }
 
-  const hasActiveFilters =
-    searchQuery !== "" ||
-    selectedBrands.length > 0 ||
-    selectedConditions.length > 0 ||
-    priceRange[0] > 0 ||
-    priceRange[1] < maxPrice
+  const hasActiveFilters = searchQuery !== "" || selectedBrands.length > 0 || selectedConditions.length > 0
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price)
-  }
+  const activeFiltersCount = (searchQuery ? 1 : 0) + selectedBrands.length + selectedConditions.length
 
   const FilterContent = () => (
     <div className="space-y-8">
@@ -132,16 +120,6 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
         </div>
       </div>
 
-      {/* Price Range */}
-      <div>
-        <h3 className="font-medium mb-4">Price Range</h3>
-        <Slider value={priceRange} onValueChange={setPriceRange} min={0} max={maxPrice} step={1000} className="mb-4" />
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{formatPrice(priceRange[0])}</span>
-          <span>{formatPrice(priceRange[1])}</span>
-        </div>
-      </div>
-
       {hasActiveFilters && (
         <Button variant="outline" onClick={clearFilters} className="w-full bg-transparent">
           Clear All Filters
@@ -151,12 +129,24 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
   )
 
   return (
-    <div>
-      {/* Page Header */}
-      <section className="bg-muted/30 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div>
+        {/* Page Header */}
+      <section className="relative py-16 bg-black text-white overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src="/luxury-watch-collection-dark-elegant-background.jpg"
+            alt="Luxury watch inventory"
+            fill
+            className="object-cover opacity-35"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h1 className="font-serif text-3xl sm:text-4xl font-bold">Our Collection</h1>
-          <p className="text-muted-foreground mt-2">Explore our curated selection of authenticated luxury timepieces</p>
+          <p className="text-gray-300 mt-2 max-w-2xl">
+            Explore our curated selection of authenticated luxury timepieces. All prices shown in CAD.
+          </p>
         </div>
       </section>
 
@@ -189,8 +179,8 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
                     <Filter className="h-4 w-4 mr-2" />
                     Filters
                     {hasActiveFilters && (
-                      <span className="ml-2 h-5 w-5 rounded-full bg-gold text-black text-xs flex items-center justify-center">
-                        !
+                      <span className="ml-2 h-5 min-w-5 px-1 rounded-full bg-gold text-black text-xs flex items-center justify-center">
+                        {activeFiltersCount}
                       </span>
                     )}
                   </Button>
@@ -209,6 +199,12 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
             {/* Active Filters */}
             {hasActiveFilters && (
               <div className="flex flex-wrap gap-2 mb-6">
+                {searchQuery !== "" && (
+                  <Button variant="secondary" size="sm" onClick={() => setSearchQuery("")} className="h-7 text-xs">
+                    “{searchQuery}”
+                    <X className="ml-1 h-3 w-3" />
+                  </Button>
+                )}
                 {selectedBrands.map((brand) => (
                   <Button
                     key={brand}
