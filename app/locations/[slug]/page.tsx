@@ -4,7 +4,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { WatchCard } from "@/components/watch-card"
 import { Button } from "@/components/ui/button"
-import { watches } from "@/lib/mock-data"
+import { getInventory } from "@/lib/actions"
+
+export const dynamic = "force-dynamic"
 
 interface LocationData {
   name: string
@@ -149,7 +151,8 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
     notFound()
   }
 
-  const featuredWatches = watches.filter((w) => w.status === "Available").slice(0, 4)
+  const inventory = await getInventory()
+  const featuredWatches = inventory.filter((w) => w.status === "Available").slice(0, 4)
 
   return (
     <main className="min-h-screen bg-background">
@@ -245,4 +248,3 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
     </main>
   )
 }
-

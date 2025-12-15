@@ -51,7 +51,7 @@ export default async function HomePage() {
             preload="metadata"
             poster="/luxury-watch-collection-dark-elegant-background.jpg"
           >
-            <source src="/hero_images/video_20230311002338.MOV" type="video/quicktime" />
+            <source src="/hero_images/video_20230311002338.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
         </div>
