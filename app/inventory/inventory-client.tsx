@@ -134,7 +134,7 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
       <section className="relative py-16 bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/luxury-watch-collection-dark-elegant-background.jpg"
+            src="/hero_images/039A9088 2.png"
             alt="Luxury watch inventory"
             fill
             className="object-cover opacity-35"

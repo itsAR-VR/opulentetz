@@ -114,7 +114,7 @@ export default function ContactPage() {
       <section className="relative py-20 bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/luxury-watch-collector-examining-rolex.jpg"
+            src="/hero_images/039A9042 2.png"
             alt="Contact Exclusive Time Zone"
             fill
             className="object-cover opacity-30"

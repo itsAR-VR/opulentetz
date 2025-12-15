@@ -9,18 +9,18 @@ const trustBullets = ["Certified Authenticity", "Multi-point Inspection", "Verif
 
 const trustMedia = [
   {
-    src: "/luxury-watch-being-examined-by-expert-jeweler.jpg",
+    src: "/hero_images/IMG_0266 2.png",
     alt: "Close-up watch inspection",
     label: "Close-up inspection",
   },
   {
-    src: "/luxury-watch-workshop-dark-moody.jpg",
+    src: "/hero_images/IMG_0025 2.png",
     alt: "Watchmaker tools and workshop",
     label: "Watchmaker tools",
     icon: Wrench,
   },
   {
-    src: "/luxury-watch-collector-examining-rolex.jpg",
+    src: "/hero_images/IMG_0140.png",
     alt: "Serial and certificate verification",
     label: "Certificate + serial verified",
     icon: BadgeCheck,
@@ -36,7 +36,7 @@ export default async function HomePage() {
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/luxury-watch-collection-dark-elegant-background.jpg"
+            src="/hero_images/IMG_0264.png"
             alt="Luxury watch collection"
             fill
             className="object-cover scale-105"
@@ -49,7 +49,7 @@ export default async function HomePage() {
             loop
             playsInline
             preload="metadata"
-            poster="/luxury-watch-collection-dark-elegant-background.jpg"
+            poster="/hero_images/IMG_0264.png"
           >
             <source src="/hero_images/video_20230311002338.mp4" type="video/mp4" />
           </video>
@@ -241,7 +241,7 @@ export default async function HomePage() {
             <div className="lg:w-1/2 relative">
               <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
                 <Image
-                  src="/luxury-watch-being-examined-by-expert-jeweler.jpg"
+                  src="/hero_images/039A9048 2.png"
                   alt="Watch authentication process"
                   fill
                   className="object-cover"

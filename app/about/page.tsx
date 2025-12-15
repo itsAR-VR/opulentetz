@@ -46,7 +46,7 @@ export default function AboutPage() {
       <section className="relative py-20 bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/luxury-watch-workshop-dark-moody.jpg"
+            src="/hero_images/039A8880 2.png"
             alt="Luxury watch workshop"
             fill
             className="object-cover opacity-30"
