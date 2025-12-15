@@ -108,7 +108,7 @@ export default function AboutPage() {
             <p>
               <strong className="text-foreground">Facebook:</strong>{" "}
               <a
-                href="https://www.facebook.com/marketplace/profile/100082510053081"
+                href="https://www.facebook.com/marketplace/profile/100023717290641/?ref=permalink"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gold hover:underline"
