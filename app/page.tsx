@@ -234,7 +234,7 @@ export default async function HomePage() {
             <div className="lg:w-1/2 relative">
               <div className="aspect-[4/3] relative rounded-lg overflow-hidden">
                 <Image
-                  src="/hero_images/039A9048 2.png"
+                  src="/hero_images/IMG_0028 2.png"
                   alt="Watch authentication process"
                   fill
                   className="object-cover"
