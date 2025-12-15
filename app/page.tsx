@@ -35,21 +35,14 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="/hero_images/IMG_0264.png"
-            alt="Luxury watch collection"
-            fill
-            className="object-cover scale-105"
-            priority
-          />
           <video
             className="absolute inset-0 h-full w-full object-cover scale-105"
             autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
-            poster="/hero_images/IMG_0264.png"
+            preload="auto"
+            aria-hidden="true"
           >
             <source src="/hero_images/video_20230311002338.mp4" type="video/mp4" />
           </video>
