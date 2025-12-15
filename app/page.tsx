@@ -33,17 +33,17 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] flex items-center bg-black text-white overflow-hidden">
+      <section className="relative min-h-[calc(100vh-5rem)] flex items-center bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
             src="/luxury-watch-collection-dark-elegant-background.jpg"
             alt="Luxury watch collection"
             fill
-            className="object-cover opacity-40"
+            className="object-cover scale-105"
             priority
           />
           <video
-            className="absolute inset-0 h-full w-full object-cover opacity-40"
+            className="absolute inset-0 h-full w-full object-cover scale-105"
             autoPlay
             muted
             loop
@@ -53,20 +53,28 @@ export default async function HomePage() {
           >
             <source src="/hero_images/video_20230311002338.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,rgba(0,0,0,0.65),rgba(0,0,0,0.38)_45%,rgba(0,0,0,0.12)_72%,rgba(0,0,0,0)_100%)]" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-2xl">
-            <p className="text-gold uppercase tracking-[0.3em] text-sm font-medium mb-4">Established Excellence</p>
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-balance">
-              Exceptional Timepieces, <span className="text-gold">Uncompromising Standards</span>
+            <div className="flex items-center gap-3 text-gold uppercase tracking-[0.35em] text-xs sm:text-sm font-medium mb-6">
+              <span className="h-px w-10 bg-gold/40" aria-hidden="true" />
+              <p>Established Excellence</p>
+            </div>
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-balance">
+              Exceptional Timepieces,<span className="block text-gold">Uncompromising Standards</span>
             </h1>
-            <p className="mt-6 text-lg text-gray-300 leading-relaxed max-w-xl">
+            <p className="mt-6 text-lg text-gray-200/80 leading-relaxed max-w-xl">
               Discover our curated collection of authenticated pre-owned luxury watches. From Rolex to Patek Philippe,
               each piece tells a story of craftsmanship and heritage — including Audemars Piguet, Omega, Cartier, and Tudor.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <Button asChild size="lg" className="bg-gold hover:bg-gold/90 text-black font-medium">
+              <Button
+                asChild
+                size="lg"
+                className="bg-gold hover:bg-gold/90 text-black font-medium shadow-[0_18px_45px_rgba(0,0,0,0.45)] ring-1 ring-gold/25"
+              >
                 <Link href="/inventory">
                   Browse Collection
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -76,7 +84,7 @@ export default async function HomePage() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white text-white hover:bg-white hover:text-black bg-transparent"
+                className="border-white/35 text-white bg-white/5 hover:bg-white/10 hover:border-white/60"
               >
                 <Link href="/sell">Sell Your Watch</Link>
               </Button>
