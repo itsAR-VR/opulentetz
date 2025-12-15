@@ -209,7 +209,7 @@ export default function SellPage() {
       <section className="relative py-20 bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
-            src="/hero_images/IMG_0249.png"
+            src="/hero_images/IMG_0033 2.png"
             alt="Sell your luxury watch"
             fill
             className="object-cover opacity-30"
