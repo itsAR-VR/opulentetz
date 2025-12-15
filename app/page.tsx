@@ -1,32 +1,31 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Shield, Award, RefreshCw, Clock } from "lucide-react"
+import { ArrowRight, BadgeCheck, CheckCircle2, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HomeInventory } from "@/components/home-inventory"
 import { getInventory } from "@/lib/actions"
 
-const valueProps = [
+const trustBullets = ["Certified Authenticity", "Multi-point Inspection", "Verified Sourcing"] as const
+
+const trustMedia = [
   {
-    icon: Shield,
-    title: "100% Authenticated",
-    description: "Every timepiece undergoes rigorous verification by our certified watchmakers.",
+    src: "/luxury-watch-being-examined-by-expert-jeweler.jpg",
+    alt: "Close-up watch inspection",
+    label: "Close-up inspection",
   },
   {
-    icon: Award,
-    title: "Premium Selection",
-    description: "Curated collection of the world's most prestigious luxury watch brands.",
+    src: "/luxury-watch-workshop-dark-moody.jpg",
+    alt: "Watchmaker tools and workshop",
+    label: "Watchmaker tools",
+    icon: Wrench,
   },
   {
-    icon: RefreshCw,
-    title: "Trade-In Program",
-    description: "Upgrade your collection with our competitive trade-in valuations.",
+    src: "/luxury-watch-collector-examining-rolex.jpg",
+    alt: "Serial and certificate verification",
+    label: "Certificate + serial verified",
+    icon: BadgeCheck,
   },
-  {
-    icon: Clock,
-    title: "Warranty Included",
-    description: "All watches come with our comprehensive 2-year service warranty.",
-  },
-]
+] as const
 
 export default async function HomePage() {
   const inventory = await getInventory()
@@ -43,6 +42,17 @@ export default async function HomePage() {
             className="object-cover opacity-40"
             priority
           />
+          <video
+            className="absolute inset-0 h-full w-full object-cover opacity-40"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/luxury-watch-collection-dark-elegant-background.jpg"
+          >
+            <source src="/hero_images/video_20230311002338.MOV" type="video/quicktime" />
+          </video>
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
         </div>
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
@@ -75,34 +85,126 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Value Props */}
-      <section className="py-20 bg-muted/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {valueProps.map((prop) => (
-              <div key={prop.title} className="flex flex-col items-center text-center">
-                <div className="h-14 w-14 rounded-full bg-gold/10 flex items-center justify-center mb-4">
-                  <prop.icon className="h-6 w-6 text-gold" />
-                </div>
-                <h3 className="font-serif text-lg font-medium">{prop.title}</h3>
-                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{prop.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Inventory */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
             <div>
-              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Inventory</p>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold">Available Watches</h2>
-              <p className="text-muted-foreground mt-2">Browse our current inventory of authenticated luxury watches.</p>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Featured Watches</p>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold">Best Sellers & New Arrivals</h2>
+              <p className="text-muted-foreground mt-2">
+                High-intent buyers start here — browse what's available now. All prices in CAD.
+              </p>
             </div>
           </div>
           <HomeInventory watches={inventory} />
+        </div>
+      </section>
+
+      {/* Authentication & Trust */}
+      <section className="py-20 bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Authentication & Trust</p>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-balance">
+                Proof behind every listing
+              </h2>
+              <p className="text-muted-foreground mt-3 max-w-xl">
+                Luxury buyers skim. We keep it simple — and show the process.
+              </p>
+
+              <div className="mt-8 space-y-4">
+                {trustBullets.map((title) => (
+                  <div key={title} className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-gold" />
+                    </div>
+                    <p className="text-base font-semibold">{title}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-4">
+              <div className="col-span-12 sm:col-span-7">
+                <div className="relative aspect-[4/5] rounded-xl overflow-hidden border border-border bg-black">
+                  <Image src={trustMedia[0].src} alt={trustMedia[0].alt} fill className="object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <p className="absolute bottom-3 left-3 text-xs font-medium text-white/90">{trustMedia[0].label}</p>
+                </div>
+              </div>
+
+              <div className="col-span-12 sm:col-span-5 flex flex-col gap-4">
+                {trustMedia.slice(1).map((item) => (
+                  <div key={item.label} className="relative aspect-[5/3] rounded-xl overflow-hidden border border-border bg-black">
+                    <Image src={item.src} alt={item.alt} fill className="object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 text-xs font-medium text-white/90">
+                      {item.icon && <item.icon className="h-4 w-4 text-gold" />}
+                      <span>{item.label}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Private vs Online */}
+      <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">How It Works</p>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-balance">Online Inventory vs Private Collection</h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
+              Some pieces are listed publicly for immediate checkout. Others are shared privately on request.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-xl border border-border bg-background p-8">
+              <h3 className="font-serif text-2xl font-semibold">Online Inventory</h3>
+              <p className="text-sm text-muted-foreground mt-2">Ready to purchase</p>
+              <div className="mt-6 space-y-3">
+                {["Ready to purchase", "Live pricing", "Immediate checkout"].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-gold shrink-0" />
+                    <p className="font-medium">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8">
+                <Button asChild className="bg-gold hover:bg-gold/90 text-black font-medium w-full sm:w-auto">
+                  <Link href="/inventory">Browse Online Inventory</Link>
+                </Button>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border bg-muted/30 p-8">
+              <h3 className="font-serif text-2xl font-semibold">Private Collection</h3>
+              <p className="text-sm text-muted-foreground mt-2">Shared on request</p>
+              <div className="mt-6 space-y-3">
+                {["Off-market pieces kept private", "Private viewing by appointment", "Can be toggled live vs private"].map(
+                  (item) => (
+                    <div key={item} className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-gold shrink-0" />
+                      <p className="font-medium">{item}</p>
+                    </div>
+                  ),
+                )}
+              </div>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+                <Button asChild className="bg-gold hover:bg-gold/90 text-black font-medium">
+                  <a href="tel:236-334-3434">Request Private List</a>
+                </Button>
+                <Button asChild variant="outline" className="bg-transparent">
+                  <Link href="/contact">Contact</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

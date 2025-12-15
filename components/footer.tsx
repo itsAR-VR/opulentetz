@@ -97,7 +97,7 @@ export function Footer() {
             <h3 className="font-medium text-sm uppercase tracking-wider mb-4">Contact Us</h3>
             <div className="space-y-3 text-sm text-gray-400">
               <p>Serving all of Canada</p>
-              <p>Kelowna • Calgary • Edmonton • Winnipeg • Toronto • Montreal</p>
+              <p>Vancouver • Calgary • Edmonton • Kelowna • Winnipeg • Toronto • Mississauga • Vaughan • Montreal</p>
               <p className="pt-2">
                 <a href="tel:236-334-3434" className="hover:text-gold transition-colors block">
                   236-334-3434

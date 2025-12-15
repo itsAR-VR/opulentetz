@@ -3,12 +3,20 @@
 import type React from "react"
 import { useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mail } from "lucide-react"
+
+type ServiceLocation = {
+  name: string
+  address: string | null
+  href: string | null
+}
 
 const contactMethods = [
   {
@@ -32,21 +40,51 @@ const contactMethods = [
   },
 ]
 
-const locations = [
+const locations: ServiceLocation[] = [
   {
     name: "Vancouver",
     address: "943 W Broadway, Unit 110, Vancouver, BC V5Z 4E1",
-    phone: "236-833-3952",
+    href: null,
   },
   {
     name: "Calgary",
     address: "2120 4th Street SW, Unit 210, Calgary, AB T2S 1W7",
-    phone: "403-703-6671",
+    href: "/locations/calgary-luxury-watches",
+  },
+  {
+    name: "Edmonton",
+    address: null,
+    href: "/locations/edmonton-luxury-watches",
+  },
+  {
+    name: "Kelowna",
+    address: null,
+    href: "/locations/kelowna-luxury-watches",
+  },
+  {
+    name: "Winnipeg",
+    address: null,
+    href: "/locations/winnipeg-luxury-watches",
   },
   {
     name: "Toronto",
     address: "25 Sheppard Ave W, North York, ON M2N 6S6",
-    phone: "416-298-8666",
+    href: "/locations/toronto-luxury-watches",
+  },
+  {
+    name: "Mississauga",
+    address: null,
+    href: null,
+  },
+  {
+    name: "Vaughan",
+    address: null,
+    href: null,
+  },
+  {
+    name: "Montreal",
+    address: null,
+    href: "/locations/montreal-luxury-watches",
   },
 ]
 
@@ -224,15 +262,30 @@ export default function ContactPage() {
       <section className="py-16 bg-muted/30 border-t border-border">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-serif text-2xl font-medium text-center mb-8">Our Locations</h2>
-          <p className="text-center text-muted-foreground mb-8">All locations by appointment only</p>
-          <div className="grid sm:grid-cols-3 gap-8">
+          <p className="text-center text-muted-foreground mb-8">
+            We service major Canadian markets. In-person meetings are available by appointment.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {locations.map((location) => (
-              <div key={location.name} className="text-center">
-                <h3 className="font-medium mb-2">{location.name}</h3>
-                <p className="text-sm text-muted-foreground mb-2">{location.address}</p>
-                <a href={`tel:${location.phone}`} className="text-gold hover:underline text-sm">
-                  {location.phone}
-                </a>
+              <div key={location.name} className="rounded-xl border border-border bg-background p-5">
+                <div className="flex items-start justify-between gap-4">
+                  {location.href ? (
+                    <Link href={location.href} className="font-medium hover:text-gold transition-colors">
+                      {location.name}
+                    </Link>
+                  ) : (
+                    <h3 className="font-medium">{location.name}</h3>
+                  )}
+                  <Badge variant="secondary" className="shrink-0">
+                    By Appointment
+                  </Badge>
+                </div>
+                {location.address && <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{location.address}</p>}
+                <div className="mt-3">
+                  <a href="tel:236-334-3434" className="text-gold hover:underline text-sm">
+                    Call / Text: 236-334-3434
+                  </a>
+                </div>
               </div>
             ))}
           </div>
