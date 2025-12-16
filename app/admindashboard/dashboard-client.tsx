@@ -2,8 +2,19 @@
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { useEffect, useMemo, useState, useTransition } from "react"
-import { adminLogin, adminLogout, importJsonAction, createInventoryAction, updateInventoryAction, updateSellRequestStatus } from "./actions"
+import { useEffect, useMemo, useRef, useState, useTransition } from "react"
+import {
+  adminLogin,
+  adminLogout,
+  importJsonAction,
+  createInventoryAction,
+  updateInventoryAction,
+  updateSellRequestStatus,
+  publishInventoryAction,
+  unpublishInventoryAction,
+  publishAllDraftInventoryAction,
+  uploadInventoryImagesAction,
+} from "./actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -101,12 +112,14 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
   const [loginError, setLoginError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isDraggingImages, setIsDraggingImages] = useState(false)
   const [inventorySearch, setInventorySearch] = useState("")
   const [inventoryBrandFilter, setInventoryBrandFilter] = useState("all")
   const [inventoryStatusFilter, setInventoryStatusFilter] = useState("all")
   const [inventoryVisibilityFilter, setInventoryVisibilityFilter] = useState("all")
   const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(inventory[0]?.id ?? null)
   const [inventoryDraft, setInventoryDraft] = useState<InventoryDraft | null>(null)
+  const imageUploadInputRef = useRef<HTMLInputElement | null>(null)
 
   const brandOptions = useMemo(() => {
     const unique = new Set(inventory.map((item) => item.brand).filter(Boolean))
@@ -278,7 +291,9 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
         router.refresh()
         return
       }
-      setSuccessMessage(`Import complete: ${summary.created} created, ${summary.updated} updated, ${summary.skipped} skipped.`)
+      setSuccessMessage(
+        `Import complete: ${summary.created} created (saved as drafts), ${summary.updated} updated, ${summary.skipped} skipped.`,
+      )
       router.refresh()
     })
   }
@@ -292,7 +307,82 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
         setErrorMessage(result.error ?? "Could not create inventory item")
         return
       }
-      setSuccessMessage(`Created item with slug ${result.slug}`)
+      setSuccessMessage(`Created draft item with slug ${result.slug}. Click Publish to push it live.`)
+      router.refresh()
+    })
+  }
+
+  const handlePublishSelected = () => {
+    if (!inventoryDraft) return
+
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    startTransition(async () => {
+      const result = await publishInventoryAction(inventoryDraft.id)
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Could not publish inventory item.")
+        return
+      }
+      setSuccessMessage("Published.")
+      router.refresh()
+    })
+  }
+
+  const handleUnpublishSelected = () => {
+    if (!inventoryDraft) return
+
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    startTransition(async () => {
+      const result = await unpublishInventoryAction(inventoryDraft.id)
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Could not unpublish inventory item.")
+        return
+      }
+      setSuccessMessage("Unpublished (now hidden on website).")
+      router.refresh()
+    })
+  }
+
+  const handlePublishAllDrafts = () => {
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    startTransition(async () => {
+      const result = await publishAllDraftInventoryAction()
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Could not publish draft inventory.")
+        return
+      }
+      setSuccessMessage(result.published ? `Published ${result.published} draft listings.` : "No draft listings to publish.")
+      router.refresh()
+    })
+  }
+
+  const handleUploadInventoryImages = (files: FileList | File[]) => {
+    if (!inventoryDraft) return
+
+    const list = Array.from(files)
+    if (list.length === 0) return
+
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    const formData = new FormData()
+    formData.append("inventoryId", inventoryDraft.id)
+    for (const file of list) {
+      formData.append("imageFiles", file)
+    }
+
+    startTransition(async () => {
+      const result = await uploadInventoryImagesAction(formData)
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Could not upload images.")
+        return
+      }
+      setSuccessMessage(`Uploaded ${result.uploaded} image${result.uploaded === 1 ? "" : "s"}.`)
       router.refresh()
     })
   }
@@ -346,7 +436,18 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
         {/* Inventory Manager */}
         <Card>
           <CardHeader>
-            <CardTitle className="font-serif">Inventory Manager ({inventory.length})</CardTitle>
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="font-serif">Inventory Manager ({inventory.length})</CardTitle>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                onClick={handlePublishAllDrafts}
+                className="bg-transparent"
+              >
+                {isPending ? "Working..." : "Publish All Drafts"}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -465,7 +566,18 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                         />
 
                         <div className="flex items-center justify-between gap-2">
-                          <Badge variant="outline">{inventoryDraft.visibility}</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">{inventoryDraft.visibility === "PUBLIC" ? "Published" : "Draft"}</Badge>
+                            {inventoryDraft.visibility === "PUBLIC" ? (
+                              <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={handleUnpublishSelected}>
+                                Unpublish
+                              </Button>
+                            ) : (
+                              <Button type="button" size="sm" className="bg-gold text-black hover:bg-gold/90" disabled={isPending} onClick={handlePublishSelected}>
+                                Publish
+                              </Button>
+                            )}
+                          </div>
                           {inventoryDraft.visibility === "PUBLIC" ? (
                             <a
                               href={`/inventory/${inventoryDraft.slug}`}
@@ -484,20 +596,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                           <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                               <Label>Visibility</Label>
-                              <Select
-                                value={inventoryDraft.visibility}
-                                onValueChange={(value) =>
-                                  setInventoryDraft((prev) => (prev ? { ...prev, visibility: value as "PUBLIC" | "PRIVATE" } : prev))
-                                }
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="PUBLIC">PUBLIC</SelectItem>
-                                  <SelectItem value="PRIVATE">PRIVATE</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <Input value={inventoryDraft.visibility === "PUBLIC" ? "Published" : "Draft"} disabled />
                             </div>
 
                             <div className="space-y-1.5">
@@ -611,14 +710,41 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                           </div>
 
                           <div className="space-y-1.5">
-                            <Label>Image URLs (comma/newline)</Label>
-                            <Textarea
-                              rows={3}
-                              value={inventoryDraft.images}
-                              onChange={(e) =>
-                                setInventoryDraft((prev) => (prev ? { ...prev, images: e.target.value } : prev))
-                              }
+                            <Label>Images</Label>
+                            <input
+                              ref={imageUploadInputRef}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => {
+                                const files = e.target.files
+                                if (files) handleUploadInventoryImages(files)
+                                e.target.value = ""
+                              }}
                             />
+                            <div
+                              className={cn(
+                                "rounded-md border border-dashed px-4 py-6 text-center text-sm transition-colors cursor-pointer",
+                                isDraggingImages ? "border-gold bg-gold/5" : "border-border hover:border-gold/70",
+                              )}
+                              onClick={() => imageUploadInputRef.current?.click()}
+                              onDragOver={(e) => {
+                                e.preventDefault()
+                                setIsDraggingImages(true)
+                              }}
+                              onDragLeave={() => setIsDraggingImages(false)}
+                              onDrop={(e) => {
+                                e.preventDefault()
+                                setIsDraggingImages(false)
+                                if (e.dataTransfer.files?.length) {
+                                  handleUploadInventoryImages(e.dataTransfer.files)
+                                }
+                              }}
+                            >
+                              <p className="font-medium text-foreground">Drag & drop images here</p>
+                              <p className="text-xs text-muted-foreground mt-1">or click to upload (stored in database)</p>
+                            </div>
                           </div>
 
                           <div className="space-y-1.5">
@@ -725,7 +851,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
               <CardTitle className="font-serif">Add Inventory Manually</CardTitle>
             </CardHeader>
             <CardContent>
-              <form action={handleManualCreate} className="space-y-3">
+              <form action={handleManualCreate} className="space-y-3" encType="multipart/form-data">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label htmlFor="brand">Brand *</Label>
@@ -756,16 +882,8 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                     <Input id="status" name="status" placeholder="Available" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="visibility">Visibility</Label>
-                    <select
-                      id="visibility"
-                      name="visibility"
-                      defaultValue="PUBLIC"
-                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="PUBLIC">PUBLIC</option>
-                      <option value="PRIVATE">PRIVATE</option>
-                    </select>
+                    <Label>Visibility</Label>
+                    <Input value="Draft (click Publish after saving)" disabled />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="tags">Tags</Label>
@@ -795,8 +913,9 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="images">Image URLs (comma or newline separated)</Label>
-                  <Textarea id="images" name="images" rows={3} placeholder="https://example.com/image1.jpg" />
+                  <Label htmlFor="imageFiles">Images</Label>
+                  <Input id="imageFiles" name="imageFiles" type="file" accept="image/*" multiple />
+                  <p className="text-xs text-muted-foreground">Drag & drop supported. Images are stored in the database.</p>
                 </div>
 
                 <div className="space-y-1.5">

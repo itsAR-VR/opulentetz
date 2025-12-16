@@ -4,6 +4,8 @@ import { Prisma } from "@/lib/generated/prisma/client"
 import { importListings, parseListingsFromJson, toSlug, ensureUniqueSlug } from "@/lib/importers/facebook"
 import { validateCredentials, setSessionCookie, clearSessionCookie, getSessionEmail } from "@/lib/admin-auth"
 import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
+import { buildInventoryImageUrl } from "@/lib/inventory-images"
 
 const requireAdmin = async () => {
   const email = await getSessionEmail()
@@ -20,6 +22,7 @@ const normalizeBrand = (value: string) => {
   if (!trimmed) return trimmed
 
   if (upper === "AP" || upper === "A.P.") return "Audemars Piguet"
+  if (/\bRLX\b/i.test(trimmed)) return "Rolex"
   if (upper.includes("R0LEX") || upper.includes("ROLEX")) return "Rolex"
   if (upper.includes("PATEK")) return "Patek Philippe"
   if (upper.includes("AUDEMARS")) return "Audemars Piguet"
@@ -28,6 +31,13 @@ const normalizeBrand = (value: string) => {
   if (upper.includes("TUDOR")) return "Tudor"
   if (upper.includes("RICHARD") || upper.includes("MILLE")) return "Richard Mille"
 
+  return trimmed
+}
+
+const normalizeTag = (value: string) => {
+  const trimmed = value.trim()
+  if (!trimmed) return trimmed
+  if (/^RLX$/i.test(trimmed)) return "Rolex"
   return trimmed
 }
 
@@ -116,27 +126,24 @@ export async function createInventoryAction(formData: FormData) {
   const status = (formData.get("status") ?? "").toString().trim() || "Available"
   const boxAndPapers = formData.get("boxAndPapers") === "on"
   const description = (formData.get("description") ?? "").toString().trim()
-  const imagesInput = (formData.get("images") ?? "").toString()
-  const images = imagesInput
-    .split(/\r?\n|,/)
-    .map((url) => url.trim())
-    .filter(Boolean)
+  const uploadedFiles = formData.getAll("imageFiles").filter((value): value is File => value instanceof File)
   const featured = formData.get("featured") === "on"
   const externalId = (formData.get("externalId") ?? "").toString().trim() || undefined
   const sourceUrl = (formData.get("sourceUrl") ?? "").toString().trim() || undefined
   const slugInput = (formData.get("slug") ?? "").toString().trim()
-  const visibility = ((formData.get("visibility") ?? "").toString().trim().toUpperCase() || "PUBLIC") as
-    | "PUBLIC"
-    | "PRIVATE"
+  const visibility: "PUBLIC" | "PRIVATE" = "PRIVATE"
   const tagsInput = (formData.get("tags") ?? "").toString()
   const tags = Array.from(
     new Set(
       tagsInput
         .split(/\r?\n|,/)
-        .map((tag) => tag.trim())
+        .map((tag) => normalizeTag(tag))
         .filter(Boolean),
     ),
   )
+  if (brand && !tags.includes(brand)) {
+    tags.push(brand)
+  }
 
   if (!brand || !model || !reference || !description || Number.isNaN(year) || Number.isNaN(price)) {
     return { success: false, error: "Brand, model, reference, year, description, and price are required." }
@@ -145,8 +152,13 @@ export async function createInventoryAction(formData: FormData) {
   const slugBase = slugInput || toSlug(`${brand}-${model}-${reference}`)
   const slug = await ensureUniqueSlug(slugBase, externalId)
 
+  const safeFiles = uploadedFiles
+    .filter((file) => file.size > 0)
+    .filter((file) => (file.type ? file.type.startsWith("image/") : true))
+    .slice(0, 12)
+
   try {
-    await prisma.inventory.create({
+    const created = await prisma.inventory.create({
       data: {
         brand,
         model,
@@ -157,7 +169,7 @@ export async function createInventoryAction(formData: FormData) {
         status,
         boxAndPapers,
         description,
-        images,
+        images: [],
         slug,
         featured,
         externalId: externalId ?? null,
@@ -165,7 +177,38 @@ export async function createInventoryAction(formData: FormData) {
         visibility,
         tags,
       },
+      select: { id: true, slug: true },
     })
+
+    if (safeFiles.length > 0) {
+      let sortOrder = 0
+      const urls: string[] = []
+
+      for (const file of safeFiles) {
+        const buffer = Buffer.from(await file.arrayBuffer())
+        const contentType = file.type?.trim() || "application/octet-stream"
+        const record = await prisma.inventoryImage.create({
+          data: {
+            inventoryId: created.id,
+            sortOrder,
+            fileName: file.name?.trim() || null,
+            contentType,
+            size: buffer.byteLength,
+            data: buffer,
+          },
+          select: { id: true },
+        })
+        urls.push(buildInventoryImageUrl(record.id))
+        sortOrder += 1
+      }
+
+      if (urls.length > 0) {
+        await prisma.inventory.update({
+          where: { id: created.id },
+          data: { images: urls },
+        })
+      }
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const target = Array.isArray(error.meta?.target) ? error.meta?.target.join(", ") : "unique field"
@@ -174,7 +217,68 @@ export async function createInventoryAction(formData: FormData) {
     throw error
   }
 
+  revalidatePath("/inventory")
+
   return { success: true, slug }
+}
+
+export async function uploadInventoryImagesAction(formData: FormData) {
+  await requireAdmin()
+
+  const inventoryId = (formData.get("inventoryId") ?? "").toString().trim()
+  if (!inventoryId) {
+    return { success: false, error: "Missing inventory ID." }
+  }
+
+  const uploadedFiles = formData.getAll("imageFiles").filter((value): value is File => value instanceof File)
+  const safeFiles = uploadedFiles
+    .filter((file) => file.size > 0)
+    .filter((file) => (file.type ? file.type.startsWith("image/") : true))
+    .slice(0, 12)
+
+  if (safeFiles.length === 0) {
+    return { success: false, error: "Please select one or more images." }
+  }
+
+  const inventory = await prisma.inventory.findUnique({
+    where: { id: inventoryId },
+    select: { images: true, slug: true },
+  })
+
+  if (!inventory) {
+    return { success: false, error: "Inventory item not found." }
+  }
+
+  let sortOrder = inventory.images.length
+  const urls: string[] = []
+
+  for (const file of safeFiles) {
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const contentType = file.type?.trim() || "application/octet-stream"
+    const record = await prisma.inventoryImage.create({
+      data: {
+        inventoryId,
+        sortOrder,
+        fileName: file.name?.trim() || null,
+        contentType,
+        size: buffer.byteLength,
+        data: buffer,
+      },
+      select: { id: true },
+    })
+    urls.push(buildInventoryImageUrl(record.id))
+    sortOrder += 1
+  }
+
+  await prisma.inventory.update({
+    where: { id: inventoryId },
+    data: { images: [...inventory.images, ...urls] },
+  })
+
+  revalidatePath("/inventory")
+  revalidatePath(`/inventory/${inventory.slug}`)
+
+  return { success: true, uploaded: urls.length, urls }
 }
 
 export async function getAdminInventory() {
@@ -236,6 +340,10 @@ export async function updateInventoryAction(id: string, input: UpdateInventoryIn
   await requireAdmin()
 
   const data: Record<string, unknown> = {}
+  const current = await prisma.inventory.findUnique({
+    where: { id },
+    select: { slug: true, brand: true },
+  })
 
   const setString = (key: keyof UpdateInventoryInput) => {
     const raw = input[key]
@@ -283,7 +391,12 @@ export async function updateInventoryAction(id: string, input: UpdateInventoryIn
   }
 
   if (Array.isArray(input.tags)) {
-    data.tags = Array.from(new Set(input.tags.map((tag) => tag.trim()).filter(Boolean)))
+    const normalized = Array.from(new Set(input.tags.map((tag) => normalizeTag(tag)).filter(Boolean)))
+    const nextBrand = typeof input.brand === "string" ? normalizeBrand(input.brand) : current?.brand
+    if (nextBrand && !normalized.includes(nextBrand)) {
+      normalized.push(nextBrand)
+    }
+    data.tags = normalized
   }
 
   if (typeof input.externalId === "string") {
@@ -326,7 +439,84 @@ export async function updateInventoryAction(id: string, input: UpdateInventoryIn
     data,
   })
 
+  revalidatePath("/inventory")
+  const currentSlug = current?.slug
+  if (currentSlug) {
+    revalidatePath(`/inventory/${currentSlug}`)
+  }
+  const nextSlug = typeof data.slug === "string" ? data.slug : null
+  if (nextSlug && nextSlug !== currentSlug) {
+    revalidatePath(`/inventory/${nextSlug}`)
+  }
+
   return { success: true }
+}
+
+export async function publishInventoryAction(id: string) {
+  await requireAdmin()
+
+  try {
+    const updated = await prisma.inventory.update({
+      where: { id },
+      data: { visibility: "PUBLIC" },
+      select: { slug: true },
+    })
+
+    revalidatePath("/inventory")
+    revalidatePath(`/inventory/${updated.slug}`)
+
+    return { success: true as const }
+  } catch {
+    return { success: false as const, error: "Could not publish inventory item." }
+  }
+}
+
+export async function unpublishInventoryAction(id: string) {
+  await requireAdmin()
+
+  try {
+    const updated = await prisma.inventory.update({
+      where: { id },
+      data: { visibility: "PRIVATE" },
+      select: { slug: true },
+    })
+
+    revalidatePath("/inventory")
+    revalidatePath(`/inventory/${updated.slug}`)
+
+    return { success: true as const }
+  } catch {
+    return { success: false as const, error: "Could not unpublish inventory item." }
+  }
+}
+
+export async function publishAllDraftInventoryAction() {
+  await requireAdmin()
+
+  try {
+    const updated = await prisma.inventory.findMany({
+      where: { visibility: "PRIVATE" },
+      select: { id: true, slug: true },
+    })
+
+    if (updated.length === 0) {
+      return { success: true as const, published: 0 }
+    }
+
+    await prisma.inventory.updateMany({
+      where: { visibility: "PRIVATE" },
+      data: { visibility: "PUBLIC" },
+    })
+
+    revalidatePath("/inventory")
+    for (const item of updated) {
+      revalidatePath(`/inventory/${item.slug}`)
+    }
+
+    return { success: true as const, published: updated.length }
+  } catch {
+    return { success: false as const, error: "Could not publish draft inventory." }
+  }
 }
 
 export async function getSellRequests() {

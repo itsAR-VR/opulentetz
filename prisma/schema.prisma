@@ -37,14 +37,31 @@ model Inventory {
   featured     Boolean  @default(false)
   externalId   String?  @unique
   sourceUrl    String?
-  visibility   InventoryVisibility @default(PUBLIC)
+  visibility   InventoryVisibility @default(PRIVATE)
 
   inquiries Inquiry[]
+  storedImages InventoryImage[]
 
   @@index([brand])
   @@index([status])
   @@index([externalId])
   @@index([visibility])
+}
+
+model InventoryImage {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  sortOrder   Int      @default(0)
+  fileName    String?
+  contentType String
+  size        Int
+  data        Bytes
+  sourceUrl   String?
+
+  @@index([inventoryId])
 }
 
 model Inquiry {

@@ -1,6 +1,8 @@
 import { getInventory } from "@/lib/actions"
 import InventoryClient from "./inventory-client"
 
+export const dynamic = "force-dynamic"
+
 export default async function InventoryPage() {
   const watches = await getInventory()
 

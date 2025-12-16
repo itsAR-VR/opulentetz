@@ -9,6 +9,8 @@ import { buildStandardProductDescription, buildStandardProductDescriptionInline,
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
 
+export const dynamic = "force-dynamic"
+
 async function getWatch(slug: string) {
   const watch = await prisma.inventory.findFirst({
     where: { slug, visibility: "PUBLIC" },

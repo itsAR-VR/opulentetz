@@ -9,6 +9,7 @@
     "start": "next start",
     "import-facebook": "tsx scripts/import_facebook.ts",
     "backfill-inventory": "tsx scripts/backfill_inventory.ts",
+    "backfill-inventory-images": "tsx scripts/backfill_inventory_images.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

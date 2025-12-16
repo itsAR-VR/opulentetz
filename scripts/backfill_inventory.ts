@@ -8,6 +8,7 @@ const detectCanonicalBrand = (text: string): CanonicalBrand | null => {
   const normalized = text.replace(/\s+/g, " ").trim()
   const upper = normalized.toUpperCase()
 
+  if (/\bRLX\b/i.test(normalized)) return "Rolex"
   if (upper.includes("R0LEX") || /\bROLEX\b/i.test(normalized)) return "Rolex"
   if (/\bA\.?P\.?\b/i.test(normalized) || /\bAP\b/i.test(normalized)) return "Audemars Piguet"
   if (/\bPATEK\b/i.test(normalized)) return "Patek Philippe"
@@ -141,4 +142,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-

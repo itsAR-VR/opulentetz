@@ -1,5 +1,6 @@
 import { Prisma } from "../generated/prisma/client"
 import { prisma } from "../prisma"
+import { ingestInventoryImagesFromUrls } from "../inventory-images"
 
 export type RawListing = {
   product_id?: string | number
@@ -28,6 +29,10 @@ export const toSlug = (value: string) =>
 const detectBrand = (title: string) => {
   const normalized = title.trim()
   const upper = normalized.toUpperCase()
+
+  if (/\bRLX\b/i.test(normalized)) {
+    return "Rolex"
+  }
 
   if (upper.includes("R0LEX")) {
     return "Rolex"
@@ -212,7 +217,7 @@ const upsertListing = async (item: RawListing) => {
   const model = deriveModel(title, brand, year, reference)
   const price = parsePrice(item.final_price)
   const condition = parseCondition(description)
-  const images = normalizeImages(item.images)
+  const imageSourceUrls = normalizeImages(item.images)
   const slugBase = toSlug(`${brand}-${model}-${reference}`)
   const slug = await ensureUniqueSlug(slugBase, externalId)
   const status = item.status ?? "Available"
@@ -224,7 +229,7 @@ const upsertListing = async (item: RawListing) => {
     select: { id: true },
   })
 
-  await prisma.inventory.upsert({
+  const record = await prisma.inventory.upsert({
     where: { externalId },
     update: {
       brand,
@@ -236,7 +241,6 @@ const upsertListing = async (item: RawListing) => {
       status,
       boxAndPapers,
       description,
-      images,
       slug,
       featured,
       sourceUrl: item.url ?? null,
@@ -252,12 +256,22 @@ const upsertListing = async (item: RawListing) => {
       status,
       boxAndPapers,
       description,
-      images,
+      images: [],
       slug,
       featured,
       sourceUrl: item.url ?? null,
+      visibility: "PRIVATE",
     },
+    select: { id: true, images: true },
   })
+
+  if (!existing && imageSourceUrls.length > 0) {
+    const stored = await ingestInventoryImagesFromUrls(record.id, imageSourceUrls)
+    await prisma.inventory.update({
+      where: { id: record.id },
+      data: { images: stored },
+    })
+  }
 
   return { created: !existing, skipped: false }
 }
