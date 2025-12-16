@@ -1,8 +1,9 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
-import { adminLogin, adminLogout, importJsonAction, createInventoryAction, updateSellRequestStatus } from "./actions"
+import Image from "next/image"
+import { useEffect, useMemo, useState, useTransition } from "react"
+import { adminLogin, adminLogout, importJsonAction, createInventoryAction, updateInventoryAction, updateSellRequestStatus } from "./actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -10,6 +11,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { WatchGallery } from "@/components/watch-gallery"
+import { cn } from "@/lib/utils"
+import { formatCadPrice } from "@/lib/formatters"
 import { Mail, Phone, Clock, Package, User } from "lucide-react"
 
 interface SellRequest {
@@ -21,7 +25,7 @@ interface SellRequest {
   condition: string
   boxAndPapers: boolean
   imagesUrl: string | null
-  contactInfo: Record<string, unknown>
+  contactInfo: unknown
   status: string
 }
 
@@ -41,18 +45,204 @@ interface Inquiry {
   } | null
 }
 
+interface InventoryItem {
+  id: string
+  createdAt: string
+  updatedAt: string
+  brand: string
+  model: string
+  reference: string
+  year: number
+  condition: string
+  price: number
+  status: string
+  boxAndPapers: boolean
+  description: string
+  images: string[]
+  tags: string[]
+  slug: string
+  featured: boolean
+  externalId: string | null
+  sourceUrl: string | null
+  visibility: "PUBLIC" | "PRIVATE"
+  inquiriesCount: number
+}
+
 interface Props {
   sessionEmail: string | null
   sellRequests: SellRequest[]
   inquiries: Inquiry[]
+  inventory: InventoryItem[]
 }
 
-export default function AdminDashboardClient({ sessionEmail, sellRequests, inquiries }: Props) {
+type InventoryDraft = {
+  id: string
+  brand: string
+  model: string
+  reference: string
+  year: string
+  condition: string
+  price: string
+  status: string
+  visibility: "PUBLIC" | "PRIVATE"
+  tags: string
+  images: string
+  description: string
+  slug: string
+  featured: boolean
+  boxAndPapers: boolean
+  externalId: string
+  sourceUrl: string
+}
+
+export default function AdminDashboardClient({ sessionEmail, sellRequests, inquiries, inventory }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [loginError, setLoginError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [inventorySearch, setInventorySearch] = useState("")
+  const [inventoryBrandFilter, setInventoryBrandFilter] = useState("all")
+  const [inventoryStatusFilter, setInventoryStatusFilter] = useState("all")
+  const [inventoryVisibilityFilter, setInventoryVisibilityFilter] = useState("all")
+  const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(inventory[0]?.id ?? null)
+  const [inventoryDraft, setInventoryDraft] = useState<InventoryDraft | null>(null)
+
+  const brandOptions = useMemo(() => {
+    const unique = new Set(inventory.map((item) => item.brand).filter(Boolean))
+    return ["all", ...Array.from(unique).sort()]
+  }, [inventory])
+
+  const filteredInventory = useMemo(() => {
+    const q = inventorySearch.trim().toLowerCase()
+
+    return inventory.filter((item) => {
+      const matchesSearch =
+        q.length === 0 ||
+        item.brand.toLowerCase().includes(q) ||
+        item.model.toLowerCase().includes(q) ||
+        item.reference.toLowerCase().includes(q) ||
+        item.slug.toLowerCase().includes(q)
+
+      const matchesBrand = inventoryBrandFilter === "all" || item.brand === inventoryBrandFilter
+      const matchesStatus = inventoryStatusFilter === "all" || item.status === inventoryStatusFilter
+      const matchesVisibility =
+        inventoryVisibilityFilter === "all" || item.visibility === (inventoryVisibilityFilter as "PUBLIC" | "PRIVATE")
+
+      return matchesSearch && matchesBrand && matchesStatus && matchesVisibility
+    })
+  }, [inventory, inventoryBrandFilter, inventorySearch, inventoryStatusFilter, inventoryVisibilityFilter])
+
+  const selectedInventoryItem = useMemo(() => {
+    if (!selectedInventoryId) return null
+    return inventory.find((item) => item.id === selectedInventoryId) ?? null
+  }, [inventory, selectedInventoryId])
+
+  const selectedInquiries = useMemo(() => {
+    if (!selectedInventoryItem) return []
+    return inquiries.filter((inquiry) => inquiry.watch?.slug === selectedInventoryItem.slug)
+  }, [inquiries, selectedInventoryItem])
+
+  useEffect(() => {
+    if (filteredInventory.length === 0) {
+      setSelectedInventoryId(null)
+      return
+    }
+
+    if (!selectedInventoryId || !filteredInventory.some((item) => item.id === selectedInventoryId)) {
+      setSelectedInventoryId(filteredInventory[0].id)
+    }
+  }, [filteredInventory, selectedInventoryId])
+
+  useEffect(() => {
+    if (!selectedInventoryItem) {
+      setInventoryDraft(null)
+      return
+    }
+
+    setInventoryDraft({
+      id: selectedInventoryItem.id,
+      brand: selectedInventoryItem.brand,
+      model: selectedInventoryItem.model,
+      reference: selectedInventoryItem.reference,
+      year: String(selectedInventoryItem.year),
+      condition: selectedInventoryItem.condition,
+      price: String(selectedInventoryItem.price),
+      status: selectedInventoryItem.status,
+      visibility: selectedInventoryItem.visibility,
+      tags: selectedInventoryItem.tags.join(", "),
+      images: selectedInventoryItem.images.join("\n"),
+      description: selectedInventoryItem.description,
+      slug: selectedInventoryItem.slug,
+      featured: selectedInventoryItem.featured,
+      boxAndPapers: selectedInventoryItem.boxAndPapers,
+      externalId: selectedInventoryItem.externalId ?? "",
+      sourceUrl: selectedInventoryItem.sourceUrl ?? "",
+    })
+  }, [selectedInventoryItem])
+
+  const parseCommaNewlineList = (value: string) =>
+    value
+      .split(/\r?\n|,/)
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+
+  const getStatusTone = (status: string) => {
+    switch (status) {
+      case "Sold":
+        return "bg-red-600 text-white"
+      case "Pending":
+        return "bg-yellow-500 text-black"
+      default:
+        return "bg-green-600 text-white"
+    }
+  }
+
+  const handleSaveInventory = () => {
+    if (!inventoryDraft) return
+
+    const year = Number(inventoryDraft.year)
+    const price = Number(inventoryDraft.price)
+    if (Number.isNaN(year) || Number.isNaN(price)) {
+      setErrorMessage("Year and price must be valid numbers.")
+      return
+    }
+
+    setSuccessMessage(null)
+    setErrorMessage(null)
+
+    const images = parseCommaNewlineList(inventoryDraft.images)
+    const tags = parseCommaNewlineList(inventoryDraft.tags)
+
+    startTransition(async () => {
+      const result = await updateInventoryAction(inventoryDraft.id, {
+        brand: inventoryDraft.brand,
+        model: inventoryDraft.model,
+        reference: inventoryDraft.reference,
+        year,
+        condition: inventoryDraft.condition,
+        price,
+        status: inventoryDraft.status,
+        visibility: inventoryDraft.visibility,
+        tags,
+        images,
+        description: inventoryDraft.description,
+        slug: inventoryDraft.slug,
+        featured: inventoryDraft.featured,
+        boxAndPapers: inventoryDraft.boxAndPapers,
+        externalId: inventoryDraft.externalId,
+        sourceUrl: inventoryDraft.sourceUrl,
+      })
+
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Could not update inventory item.")
+        return
+      }
+
+      setSuccessMessage("Inventory updated.")
+      router.refresh()
+    })
+  }
 
   const handleLogin = async (formData: FormData) => {
     setLoginError(null)
@@ -83,9 +273,12 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
         return
       }
       const summary = result.summary
-      setSuccessMessage(
-        `Import complete: ${summary.created} created, ${summary.updated} updated, ${summary.skipped} skipped.`,
-      )
+      if (!summary) {
+        setSuccessMessage("Import complete.")
+        router.refresh()
+        return
+      }
+      setSuccessMessage(`Import complete: ${summary.created} created, ${summary.updated} updated, ${summary.skipped} skipped.`)
       router.refresh()
     })
   }
@@ -150,6 +343,364 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
         {successMessage && <p className="text-green-600 text-sm">{successMessage}</p>}
         {errorMessage && <p className="text-red-600 text-sm">{errorMessage}</p>}
 
+        {/* Inventory Manager */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-serif">Inventory Manager ({inventory.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex flex-col md:flex-row gap-3">
+                  <Input
+                    placeholder="Search by brand, model, reference, or slug..."
+                    value={inventorySearch}
+                    onChange={(e) => setInventorySearch(e.target.value)}
+                  />
+
+                  <Select value={inventoryBrandFilter} onValueChange={setInventoryBrandFilter}>
+                    <SelectTrigger className="w-full md:w-52">
+                      <SelectValue placeholder="Brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brandOptions.map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand === "all" ? "All Brands" : brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={inventoryVisibilityFilter} onValueChange={setInventoryVisibilityFilter}>
+                    <SelectTrigger className="w-full md:w-40">
+                      <SelectValue placeholder="Visibility" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="PUBLIC">Public</SelectItem>
+                      <SelectItem value="PRIVATE">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={inventoryStatusFilter} onValueChange={setInventoryStatusFilter}>
+                    <SelectTrigger className="w-full md:w-40">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="Available">Available</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Sold">Sold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {filteredInventory.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-10">No inventory matches your filters.</p>
+                ) : (
+                  <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {filteredInventory.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setSelectedInventoryId(item.id)}
+                        className="text-left"
+                      >
+                        <Card
+                          className={cn(
+                            "overflow-hidden border-border hover:border-gold/50 transition-colors",
+                            item.id === selectedInventoryId && "border-gold",
+                          )}
+                        >
+                          <div className="relative aspect-square bg-muted overflow-hidden">
+                            <Image
+                              src={item.images[0] || "/placeholder.svg"}
+                              alt={`${item.brand} ${item.model}`}
+                              fill
+                              className="object-cover"
+                            />
+                            <Badge className={cn("absolute top-3 left-3 text-xs", getStatusTone(item.status))}>
+                              {item.status}
+                            </Badge>
+                            {item.visibility === "PRIVATE" && (
+                              <Badge className="absolute top-3 right-3 bg-black/70 text-white text-xs border border-white/10">
+                                Private
+                              </Badge>
+                            )}
+                          </div>
+                          <CardContent className="p-4">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider">{item.brand}</p>
+                            <h3 className="font-serif text-lg font-medium mt-1">{item.model}</h3>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Ref. {item.reference} • {item.year}
+                            </p>
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                              <span className="font-medium">{formatCadPrice(item.price)}</span>
+                              <span className="text-xs text-muted-foreground">{item.inquiriesCount} inquiries</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="lg:col-span-1">
+                <Card className="sticky top-6">
+                  <CardHeader>
+                    <CardTitle className="font-serif text-xl">Edit Listing</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {!inventoryDraft ? (
+                      <p className="text-muted-foreground text-sm">Select a listing to edit.</p>
+                    ) : (
+                      <>
+                        <WatchGallery
+                          images={parseCommaNewlineList(inventoryDraft.images)}
+                          alt={`${inventoryDraft.brand} ${inventoryDraft.model}`}
+                          status={inventoryDraft.status}
+                          statusLabel={inventoryDraft.status}
+                          boxAndPapers={inventoryDraft.boxAndPapers}
+                        />
+
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge variant="outline">{inventoryDraft.visibility}</Badge>
+                          {inventoryDraft.visibility === "PUBLIC" ? (
+                            <a
+                              href={`/inventory/${inventoryDraft.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-gold hover:underline"
+                            >
+                              Open public page →
+                            </a>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Hidden on website</span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <Label>Visibility</Label>
+                              <Select
+                                value={inventoryDraft.visibility}
+                                onValueChange={(value) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, visibility: value as "PUBLIC" | "PRIVATE" } : prev))
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="PUBLIC">PUBLIC</SelectItem>
+                                  <SelectItem value="PRIVATE">PRIVATE</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <Label>Status</Label>
+                              <Select
+                                value={inventoryDraft.status}
+                                onValueChange={(value) => setInventoryDraft((prev) => (prev ? { ...prev, status: value } : prev))}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Available">Available</SelectItem>
+                                  <SelectItem value="Pending">Pending</SelectItem>
+                                  <SelectItem value="Sold">Sold</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <Label>Brand</Label>
+                              <Input
+                                value={inventoryDraft.brand}
+                                onChange={(e) => setInventoryDraft((prev) => (prev ? { ...prev, brand: e.target.value } : prev))}
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Model</Label>
+                              <Input
+                                value={inventoryDraft.model}
+                                onChange={(e) => setInventoryDraft((prev) => (prev ? { ...prev, model: e.target.value } : prev))}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <Label>Reference</Label>
+                              <Input
+                                value={inventoryDraft.reference}
+                                onChange={(e) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, reference: e.target.value } : prev))
+                                }
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Year</Label>
+                              <Input
+                                type="number"
+                                value={inventoryDraft.year}
+                                onChange={(e) => setInventoryDraft((prev) => (prev ? { ...prev, year: e.target.value } : prev))}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1.5">
+                              <Label>Condition</Label>
+                              <Input
+                                value={inventoryDraft.condition}
+                                onChange={(e) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, condition: e.target.value } : prev))
+                                }
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <Label>Price (CAD)</Label>
+                              <Input
+                                type="number"
+                                value={inventoryDraft.price}
+                                onChange={(e) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, price: e.target.value } : prev))
+                                }
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={inventoryDraft.boxAndPapers}
+                                onChange={(e) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, boxAndPapers: e.target.checked } : prev))
+                                }
+                                className="h-4 w-4"
+                              />
+                              Complete Set
+                            </label>
+                            <label className="flex items-center gap-2 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={inventoryDraft.featured}
+                                onChange={(e) =>
+                                  setInventoryDraft((prev) => (prev ? { ...prev, featured: e.target.checked } : prev))
+                                }
+                                className="h-4 w-4"
+                              />
+                              Featured
+                            </label>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>Tags (comma/newline)</Label>
+                            <Input
+                              value={inventoryDraft.tags}
+                              onChange={(e) => setInventoryDraft((prev) => (prev ? { ...prev, tags: e.target.value } : prev))}
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>Image URLs (comma/newline)</Label>
+                            <Textarea
+                              rows={3}
+                              value={inventoryDraft.images}
+                              onChange={(e) =>
+                                setInventoryDraft((prev) => (prev ? { ...prev, images: e.target.value } : prev))
+                              }
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>Description</Label>
+                            <Textarea
+                              rows={5}
+                              value={inventoryDraft.description}
+                              onChange={(e) =>
+                                setInventoryDraft((prev) => (prev ? { ...prev, description: e.target.value } : prev))
+                              }
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>Slug</Label>
+                            <Input
+                              value={inventoryDraft.slug}
+                              onChange={(e) => setInventoryDraft((prev) => (prev ? { ...prev, slug: e.target.value } : prev))}
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>External ID</Label>
+                            <Input
+                              value={inventoryDraft.externalId}
+                              onChange={(e) =>
+                                setInventoryDraft((prev) => (prev ? { ...prev, externalId: e.target.value } : prev))
+                              }
+                            />
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label>Source URL</Label>
+                            <Input
+                              value={inventoryDraft.sourceUrl}
+                              onChange={(e) =>
+                                setInventoryDraft((prev) => (prev ? { ...prev, sourceUrl: e.target.value } : prev))
+                              }
+                            />
+                          </div>
+
+                          {inventoryDraft && (
+                            <div className="border-t pt-4 space-y-3">
+                              <Button
+                                type="button"
+                                onClick={handleSaveInventory}
+                                disabled={isPending}
+                                className="w-full bg-gold text-black hover:bg-gold/90"
+                              >
+                                {isPending ? "Saving..." : "Save Changes"}
+                              </Button>
+
+                              <div>
+                                <p className="text-sm font-medium">Inquiries for this watch</p>
+                                {selectedInquiries.length === 0 ? (
+                                  <p className="text-xs text-muted-foreground mt-1">No inquiries for this listing yet.</p>
+                                ) : (
+                                  <div className="mt-2 space-y-2">
+                                    {selectedInquiries.slice(0, 5).map((inquiry) => (
+                                      <div key={inquiry.id} className="rounded-md border border-border p-2">
+                                        <p className="text-xs font-medium">{inquiry.name}</p>
+                                        <p className="text-xs text-muted-foreground">{inquiry.email}</p>
+                                      </div>
+                                    ))}
+                                    {selectedInquiries.length > 5 && (
+                                      <p className="text-xs text-muted-foreground">+ {selectedInquiries.length - 5} more</p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -203,6 +754,22 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                   <div className="space-y-1.5">
                     <Label htmlFor="status">Status</Label>
                     <Input id="status" name="status" placeholder="Available" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="visibility">Visibility</Label>
+                    <select
+                      id="visibility"
+                      name="visibility"
+                      defaultValue="PUBLIC"
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="PUBLIC">PUBLIC</option>
+                      <option value="PRIVATE">PRIVATE</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="tags">Tags</Label>
+                    <Input id="tags" name="tags" placeholder="Rolex, Daytona, Panda" />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="slug">Slug</Label>
@@ -267,7 +834,10 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
             ) : (
               <div className="space-y-4">
                 {sellRequests.map((request) => {
-                  const contact = request.contactInfo as Record<string, string>
+                  const contact =
+                    request.contactInfo && typeof request.contactInfo === "object"
+                      ? (request.contactInfo as Record<string, string>)
+                      : ({} as Record<string, string>)
                   return (
                     <div key={request.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-start justify-between gap-4">

@@ -11,6 +11,7 @@ const serializeInventory = (item: Inventory): InventoryItem => ({
 
 export async function getInventory(): Promise<InventoryItem[]> {
   const items = await prisma.inventory.findMany({
+    where: { visibility: "PUBLIC" },
     orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
   })
 

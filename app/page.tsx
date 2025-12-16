@@ -12,6 +12,7 @@ const trustMedia = [
     src: "/hero_images/IMG_0266 2.png",
     alt: "Close-up watch inspection",
     label: "Close-up inspection",
+    icon: undefined,
   },
   {
     src: "/hero_images/IMG_0025 2.png",
@@ -147,62 +148,6 @@ export default async function HomePage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Private vs Online */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">How It Works</p>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-balance">Online Inventory vs Private Collection</h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl mx-auto">
-              Some pieces are listed publicly for immediate checkout. Others are shared privately on request.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="rounded-xl border border-border bg-background p-8">
-              <h3 className="font-serif text-2xl font-semibold">Online Inventory</h3>
-              <p className="text-sm text-muted-foreground mt-2">Ready to purchase</p>
-              <div className="mt-6 space-y-3">
-                {["Ready to purchase", "Live pricing", "Immediate checkout"].map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <CheckCircle2 className="h-5 w-5 text-gold shrink-0" />
-                    <p className="font-medium">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8">
-                <Button asChild className="bg-gold hover:bg-gold/90 text-black font-medium w-full sm:w-auto">
-                  <Link href="/inventory">Browse Online Inventory</Link>
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border bg-muted/30 p-8">
-              <h3 className="font-serif text-2xl font-semibold">Private Collection</h3>
-              <p className="text-sm text-muted-foreground mt-2">Shared on request</p>
-              <div className="mt-6 space-y-3">
-                {["Off-market pieces kept private", "Private viewing by appointment", "Can be toggled live vs private"].map(
-                  (item) => (
-                    <div key={item} className="flex items-center gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-gold shrink-0" />
-                      <p className="font-medium">{item}</p>
-                    </div>
-                  ),
-                )}
-              </div>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <Button asChild className="bg-gold hover:bg-gold/90 text-black font-medium">
-                  <a href="tel:236-334-3434">Request Private List</a>
-                </Button>
-                <Button asChild variant="outline" className="bg-transparent">
-                  <Link href="/contact">Contact</Link>
-                </Button>
               </div>
             </div>
           </div>

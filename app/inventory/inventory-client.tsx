@@ -24,15 +24,14 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   useEffect(() => {
-    const brandParam = searchParams.get("brand")
-    const conditionParam = searchParams.get("condition")
-    const qParam = searchParams.get("q")
+    const brandParams = Array.from(new Set(searchParams.getAll("brand").filter(Boolean)))
+    const conditionParams = Array.from(new Set(searchParams.getAll("condition").filter(Boolean)))
+    const qParam = searchParams.get("q") ?? ""
 
-    if (brandParam) setSelectedBrands([brandParam])
-    if (conditionParam) setSelectedConditions([conditionParam])
-    if (qParam) setSearchQuery(qParam)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    setSelectedBrands(brandParams)
+    setSelectedConditions(conditionParams)
+    setSearchQuery(qParam)
+  }, [searchParams])
 
   const brandOptions = useMemo(() => {
     const unique = new Set(watches.map((w) => w.brand))
@@ -80,24 +79,26 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
 
   const activeFiltersCount = (searchQuery ? 1 : 0) + selectedBrands.length + selectedConditions.length
 
+  const toInputId = (prefix: string, value: string) =>
+    `${prefix}-${value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`
+
   const FilterContent = () => (
     <div className="space-y-8">
       {/* Brands */}
       <div>
         <h3 className="font-medium mb-4">Brands</h3>
         <div className="space-y-3">
-          {brandOptions.map((brand) => (
-            <div key={brand} className="flex items-center gap-2">
-              <Checkbox
-                id={`brand-${brand}`}
-                checked={selectedBrands.includes(brand)}
-                onCheckedChange={() => toggleBrand(brand)}
-              />
-              <Label htmlFor={`brand-${brand}`} className="text-sm cursor-pointer">
-                {brand}
-              </Label>
-            </div>
-          ))}
+          {brandOptions.map((brand) => {
+            const id = toInputId("brand", brand)
+            return (
+              <div key={brand} className="flex items-center gap-2">
+                <Checkbox id={id} checked={selectedBrands.includes(brand)} onCheckedChange={() => toggleBrand(brand)} />
+                <Label htmlFor={id} className="text-sm cursor-pointer">
+                  {brand}
+                </Label>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -105,18 +106,21 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
       <div>
         <h3 className="font-medium mb-4">Condition</h3>
         <div className="space-y-3">
-          {conditionOptions.map((condition) => (
-            <div key={condition} className="flex items-center gap-2">
-              <Checkbox
-                id={`condition-${condition}`}
-                checked={selectedConditions.includes(condition)}
-                onCheckedChange={() => toggleCondition(condition)}
-              />
-              <Label htmlFor={`condition-${condition}`} className="text-sm cursor-pointer">
-                {condition}
-              </Label>
-            </div>
-          ))}
+          {conditionOptions.map((condition) => {
+            const id = toInputId("condition", condition)
+            return (
+              <div key={condition} className="flex items-center gap-2">
+                <Checkbox
+                  id={id}
+                  checked={selectedConditions.includes(condition)}
+                  onCheckedChange={() => toggleCondition(condition)}
+                />
+                <Label htmlFor={id} className="text-sm cursor-pointer">
+                  {condition}
+                </Label>
+              </div>
+            )
+          })}
         </div>
       </div>
 

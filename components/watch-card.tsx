@@ -17,13 +17,10 @@ interface WatchCardProps {
 
 export function WatchCard({ watch }: WatchCardProps) {
   const getStatusBadge = () => {
-    if (watch.status === "Pending") {
-      return <Badge className="absolute top-3 left-3 bg-yellow-500 text-black text-xs">Pending Sale</Badge>
-    }
     if (watch.status === "Sold") {
       return <Badge className="absolute top-3 left-3 bg-red-600 text-white text-xs">Sold</Badge>
     }
-    return null
+    return <Badge className="absolute top-3 left-3 bg-green-600 text-white text-xs">Available</Badge>
   }
 
   return (

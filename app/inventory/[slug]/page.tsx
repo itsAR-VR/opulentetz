@@ -3,15 +3,15 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowLeft, Check, Phone, Mail, Shield, Award, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { WatchGallery } from "@/components/watch-gallery"
 import { buildStandardProductDescription, buildStandardProductDescriptionInline, formatCadPrice } from "@/lib/formatters"
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
 
 async function getWatch(slug: string) {
-  const watch = await prisma.inventory.findUnique({
-    where: { slug },
+  const watch = await prisma.inventory.findFirst({
+    where: { slug, visibility: "PUBLIC" },
   })
 
   if (!watch) return null
@@ -29,7 +29,8 @@ async function getRelatedWatches(brand: string, excludeSlug: string) {
     where: {
       brand,
       slug: { not: excludeSlug },
-      status: "Available",
+      status: { not: "Sold" },
+      visibility: "PUBLIC",
     },
     take: 4,
     orderBy: { createdAt: "desc" },
@@ -90,18 +91,7 @@ export default async function WatchDetailPage({
 
   const relatedWatches = await getRelatedWatches(watch.brand, slug)
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Available":
-        return "bg-green-600 text-white"
-      case "Pending":
-        return "bg-yellow-500 text-black"
-      case "Sold":
-        return "bg-red-600 text-white"
-      default:
-        return "bg-gray-500 text-white"
-    }
-  }
+  const publicStatus = watch.status === "Sold" ? "Sold" : "Available"
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,45 +112,13 @@ export default async function WatchDetailPage({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Gallery */}
-          <div className="space-y-4">
-            {/* Main Image */}
-            <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-              <Image
-                src={watch.images[0] || "/placeholder.svg"}
-                alt={`${watch.brand} ${watch.model}`}
-                fill
-                className="object-cover"
-                priority
-              />
-              <Badge className={`absolute top-4 left-4 ${getStatusColor(watch.status)}`}>
-                {watch.status}
-              </Badge>
-              {watch.boxAndPapers && (
-                <Badge className="absolute top-4 right-4 bg-gold text-black">
-                  Complete Set
-                </Badge>
-              )}
-            </div>
-
-            {/* Thumbnail Grid */}
-            {watch.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-3">
-                {watch.images.slice(0, 4).map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square bg-muted rounded-md overflow-hidden border-2 border-transparent hover:border-gold transition-colors cursor-pointer"
-                  >
-                    <Image
-                      src={image}
-                      alt={`${watch.brand} ${watch.model} - Image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <WatchGallery
+            images={watch.images}
+            alt={`${watch.brand} ${watch.model}`}
+            status={publicStatus}
+            statusLabel={publicStatus}
+            boxAndPapers={watch.boxAndPapers}
+          />
 
           {/* Watch Details */}
           <div className="space-y-6">
@@ -209,7 +167,7 @@ export default async function WatchDetailPage({
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground">Status</p>
-                <p className="font-medium text-lg">{watch.status}</p>
+                <p className="font-medium text-lg">{publicStatus}</p>
               </div>
             </div>
 

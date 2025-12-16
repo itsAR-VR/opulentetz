@@ -18,7 +18,7 @@ export function HomeInventory({ watches }: HomeInventoryProps) {
   const [brandFilter, setBrandFilter] = useState<string>("all")
   const [visibleCount, setVisibleCount] = useState(12)
 
-  const availableWatches = useMemo(() => watches.filter((w) => w.status === "Available"), [watches])
+  const availableWatches = useMemo(() => watches.filter((w) => w.status !== "Sold"), [watches])
 
   const brandOptions = useMemo(() => {
     const unique = new Set(availableWatches.map((w) => w.brand))
@@ -124,4 +124,3 @@ export function HomeInventory({ watches }: HomeInventoryProps) {
     </div>
   )
 }
-

@@ -152,7 +152,7 @@ export default async function LocationPage({ params }: { params: Promise<{ slug:
   }
 
   const inventory = await getInventory()
-  const featuredWatches = inventory.filter((w) => w.status === "Available").slice(0, 4)
+  const featuredWatches = inventory.filter((w) => w.status !== "Sold").slice(0, 4)
 
   return (
     <main className="min-h-screen bg-background">

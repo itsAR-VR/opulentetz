@@ -13,5 +13,5 @@ export interface SellRequestInput {
   condition: string
   boxAndPapers: boolean
   imagesUrl?: string | null
-  contactInfo: Prisma.JsonValue
+  contactInfo: Prisma.InputJsonValue
 }

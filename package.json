@@ -8,6 +8,7 @@
     "lint": "eslint .",
     "start": "next start",
     "import-facebook": "tsx scripts/import_facebook.ts",
+    "backfill-inventory": "tsx scripts/backfill_inventory.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

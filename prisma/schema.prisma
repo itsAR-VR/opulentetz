@@ -13,6 +13,11 @@ datasource db {
   provider = "postgresql"
 }
 
+enum InventoryVisibility {
+  PUBLIC
+  PRIVATE
+}
+
 model Inventory {
   id           String   @id @default(uuid())
   createdAt    DateTime @default(now())
@@ -27,16 +32,19 @@ model Inventory {
   boxAndPapers Boolean  @default(true)
   description  String   @db.Text
   images       String[]
+  tags         String[] @default([])
   slug         String   @unique
   featured     Boolean  @default(false)
   externalId   String?  @unique
   sourceUrl    String?
+  visibility   InventoryVisibility @default(PUBLIC)
 
   inquiries Inquiry[]
 
   @@index([brand])
   @@index([status])
   @@index([externalId])
+  @@index([visibility])
 }
 
 model Inquiry {

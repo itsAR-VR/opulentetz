@@ -19,8 +19,6 @@ export type ImportSummary = {
   skipped: number
 }
 
-const knownBrands = ["Rolex", "Omega", "Audemars Piguet", "Patek Philippe", "AP"]
-
 export const toSlug = (value: string) =>
   value
     .toLowerCase()
@@ -35,15 +33,29 @@ const detectBrand = (title: string) => {
     return "Rolex"
   }
 
-  for (const brand of knownBrands) {
-    if (upper.startsWith(brand.toUpperCase())) {
-      if (brand === "AP") return "Audemars Piguet"
+  if (/\bA\.?P\.?\b/i.test(normalized) || /\bAP\b/i.test(normalized)) {
+    return "Audemars Piguet"
+  }
+
+  const canonicalBrands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Tudor", "Richard Mille"]
+
+  // Prefer explicit multi-word matches
+  for (const brand of canonicalBrands) {
+    if (upper.includes(brand.toUpperCase())) {
       return brand
     }
   }
 
-  const firstWord = normalized.split(" ")[0]
-  return firstWord || "Rolex"
+  // Helpful partials/aliases
+  if (/\bPATEK\b/i.test(normalized)) return "Patek Philippe"
+  if (/\bAUDEMARS\b/i.test(normalized)) return "Audemars Piguet"
+
+  // Fallback: first non-year token
+  const withoutLeadingYear = normalized.replace(/^(19|20)\d{2}\s+/, "")
+  const firstWord = withoutLeadingYear.split(" ")[0]
+  if (!firstWord) return "Rolex"
+  if (/^\d{4}$/.test(firstWord)) return "Rolex"
+  return firstWord
 }
 
 const parseYear = (title: string, description?: string) => {
@@ -75,21 +87,70 @@ const parseReference = (title: string, description?: string) => {
 }
 
 const parseCondition = (description?: string) => {
-  const conditionFromDescription = description?.match(/Condition:\s*([^\n\r]+)/i)
-  if (conditionFromDescription?.[1]) {
-    return conditionFromDescription[1].trim()
+  const normalizeCondition = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return "Excellent"
+
+    const normalized = trimmed.replace(/\s+/g, " ")
+    const upper = normalized.toUpperCase()
+
+    const canonicalMap: Record<string, string> = {
+      "BRAND NEW": "Brand New",
+      "BRAND NEW UNWORN": "Brand New Unworn",
+      "NEW UNWORN": "Brand New Unworn",
+      UNWORN: "Unworn",
+      MINT: "Mint",
+      "LIKE NEW": "Like New",
+      EXCELLENT: "Excellent",
+      "VERY GOOD": "Very Good",
+      GOOD: "Good",
+      FAIR: "Fair",
+    }
+
+    if (canonicalMap[upper]) return canonicalMap[upper]
+
+    return normalized
+      .toLowerCase()
+      .split(/\s+/)
+      .map((word) => (word ? `${word[0].toUpperCase()}${word.slice(1)}` : word))
+      .join(" ")
   }
 
-  const known = ["Unworn", "Excellent", "Very Good", "Good"]
+  const conditionFromDescription = description?.match(/Condition:\s*([^\n\r]+)/i)
+  if (conditionFromDescription?.[1]) {
+    return normalizeCondition(conditionFromDescription[1])
+  }
+
+  const known = ["Brand New Unworn", "Brand New", "Unworn", "Mint", "Excellent", "Very Good", "Good", "Fair"]
   const found = known.find((condition) => description?.toLowerCase().includes(condition.toLowerCase()))
-  return found ?? "Excellent"
+  return normalizeCondition(found ?? "Excellent")
 }
 
 const deriveModel = (title: string, brand: string, year: number, reference: string) => {
   let model = title
-  if (brand) {
-    model = model.replace(new RegExp(`^${brand}\\s*`, "i"), "")
+
+  // Remove leading year first (common in marketplace titles)
+  if (year) {
+    model = model.replace(new RegExp(`^\\s*${year}\\s*`, "i"), "")
   }
+
+  const brandAliases: Record<string, string[]> = {
+    "Audemars Piguet": ["Audemars Piguet", "Audemars", "AP", "A.P."],
+    "Patek Philippe": ["Patek Philippe", "Patek"],
+    Rolex: ["Rolex"],
+    Omega: ["Omega"],
+    Cartier: ["Cartier"],
+    Tudor: ["Tudor"],
+    "Richard Mille": ["Richard Mille", "RM"],
+  }
+
+  const prefixesToStrip = brandAliases[brand] ?? (brand ? [brand] : [])
+  for (const prefix of prefixesToStrip) {
+    if (!prefix) continue
+    const escaped = prefix.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&")
+    model = model.replace(new RegExp(`^\\s*${escaped}\\s*`, "i"), "")
+  }
+
   if (year) {
     model = model.replace(new RegExp(String(year), "g"), "")
   }
