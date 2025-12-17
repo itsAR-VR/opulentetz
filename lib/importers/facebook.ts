@@ -78,15 +78,26 @@ const parseYear = (title: string, description?: string) => {
 }
 
 const parseReference = (title: string, description?: string) => {
-  const refFromDescription = description?.match(/Ref:?\s*([A-Za-z0-9\-\.]+)/i)
-  if (refFromDescription?.[1]) {
-    return refFromDescription[1]
+  const extractFromText = (text: string) => {
+    const cleaned = text.replace(/\r/g, "")
+    const match = cleaned.match(/\bRef(?:erence)?\.?\s*#?\s*[:\-]?\s*([A-Za-z0-9][A-Za-z0-9\-\.]{2,})\b/i)
+    if (match?.[1]) return match[1]
+    return null
   }
+
+  const refFromDescription = description ? extractFromText(description) : null
+  if (refFromDescription) return refFromDescription
 
   const referenceInParens = title.match(/\(([^)]+)\)/)
   if (referenceInParens?.[1]) {
-    return referenceInParens[1]
+    const candidate = referenceInParens[1].trim()
+    if (/\d/.test(candidate)) {
+      return candidate
+    }
   }
+
+  const refFromTitle = extractFromText(title)
+  if (refFromTitle) return refFromTitle
 
   return "unlisted-reference"
 }
