@@ -26,7 +26,7 @@ export interface Watch {
 }
 
 const standardDescription = (year: number, reference: string, condition: string, boxAndPapers: boolean) =>
-  buildStandardProductDescription({ year, reference, condition, boxAndPapers })
+  buildStandardProductDescription({ year, reference, condition, boxAndPapers, status: "Available" })
 
 export const watches: Watch[] = [
   {

@@ -20,6 +20,14 @@ export type ImportSummary = {
   skipped: number
 }
 
+export type ImportOptions = {
+  defaultVisibility?: "PUBLIC" | "PRIVATE"
+  forceVisibility?: "PUBLIC" | "PRIVATE"
+  forceStatus?: string
+  forceFeatured?: boolean
+  forceBoxAndPapers?: boolean
+}
+
 export const toSlug = (value: string) =>
   value
     .toLowerCase()
@@ -214,7 +222,7 @@ const normalizeImages = (images?: string[]) => {
   return images.filter((url) => typeof url === "string" && url.trim().length > 0)
 }
 
-const upsertListing = async (item: RawListing) => {
+const upsertListing = async (item: RawListing, options: ImportOptions) => {
   const externalId = item.product_id?.toString()
   if (!externalId) {
     return { created: false, skipped: true }
@@ -231,9 +239,11 @@ const upsertListing = async (item: RawListing) => {
   const imageSourceUrls = normalizeImages(item.images)
   const slugBase = toSlug(`${brand}-${model}-${reference}`)
   const slug = await ensureUniqueSlug(slugBase, externalId)
-  const status = item.status ?? "Available"
-  const featured = Boolean(item.featured)
-  const boxAndPapers = item.boxAndPapers ?? true
+  const status = options.forceStatus ?? (item.status ?? "Available")
+  const featured = options.forceFeatured ?? Boolean(item.featured)
+  const boxAndPapers =
+    typeof options.forceBoxAndPapers === "boolean" ? options.forceBoxAndPapers : (item.boxAndPapers ?? true)
+  const createVisibility = options.forceVisibility ?? options.defaultVisibility ?? "PRIVATE"
 
   const existing = await prisma.inventory.findUnique({
     where: { externalId },
@@ -255,6 +265,7 @@ const upsertListing = async (item: RawListing) => {
       slug,
       featured,
       sourceUrl: item.url ?? null,
+      ...(options.forceVisibility ? { visibility: options.forceVisibility } : {}),
     },
     create: {
       externalId,
@@ -271,7 +282,7 @@ const upsertListing = async (item: RawListing) => {
       slug,
       featured,
       sourceUrl: item.url ?? null,
-      visibility: "PRIVATE",
+      visibility: createVisibility,
     },
     select: { id: true, images: true },
   })
@@ -297,13 +308,13 @@ export const parseListingsFromJson = (raw: unknown): RawListing[] => {
   return []
 }
 
-export async function importListings(entries: RawListing[]): Promise<ImportSummary> {
+export async function importListings(entries: RawListing[], options: ImportOptions = {}): Promise<ImportSummary> {
   let created = 0
   let updated = 0
   let skipped = 0
 
   for (const entry of entries) {
-    const result = await upsertListing(entry)
+    const result = await upsertListing(entry, options)
     if (result.skipped) {
       skipped += 1
       continue

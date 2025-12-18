@@ -15,12 +15,17 @@ export function buildStandardProductDescription(options: {
   reference: string
   condition: string
   boxAndPapers?: boolean
+  status?: string
 }) {
+  const statusLine = options.status?.trim().toLowerCase() === "sold"
+    ? "Sold by Exclusive Time Zone"
+    : "Available for purchase from Exclusive Time Zone"
+
   return [
     `Year: ${options.year}`,
     `Ref: ${options.reference}`,
     `Condition: ${formatConditionLabel(options.condition)}`,
-    "Available for purchase from Exclusive Time Zone",
+    statusLine,
   ].join("\n")
 }
 
@@ -29,6 +34,7 @@ export function buildStandardProductDescriptionInline(options: {
   reference: string
   condition: string
   boxAndPapers?: boolean
+  status?: string
 }) {
   return buildStandardProductDescription(options).replaceAll("\n", " • ")
 }

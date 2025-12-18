@@ -111,6 +111,37 @@ export async function importJsonAction(formData: FormData) {
   }
 
   const summary = await importListings(entries)
+  revalidatePath("/")
+  revalidatePath("/inventory")
+  return { success: true, summary }
+}
+
+export async function importSoldJsonAction(formData: FormData) {
+  await requireAdmin()
+
+  const file = formData.get("file")
+  if (!(file instanceof File)) {
+    return { success: false, error: "Please attach a JSON file." }
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const text = buffer.toString("utf8")
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return { success: false, error: "Invalid JSON file." }
+  }
+
+  const entries = parseListingsFromJson(parsed)
+  if (!entries.length) {
+    return { success: false, error: "No listings found in JSON." }
+  }
+
+  const summary = await importListings(entries, { forceStatus: "Sold", forceVisibility: "PUBLIC", forceFeatured: false })
+  revalidatePath("/")
+  revalidatePath("/inventory")
   return { success: true, summary }
 }
 

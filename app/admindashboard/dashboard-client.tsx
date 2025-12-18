@@ -7,6 +7,7 @@ import {
   adminLogin,
   adminLogout,
   importJsonAction,
+  importSoldJsonAction,
   createInventoryAction,
   updateInventoryAction,
   updateSellRequestStatus,
@@ -294,6 +295,26 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
       setSuccessMessage(
         `Import complete: ${summary.created} created (saved as drafts), ${summary.updated} updated, ${summary.skipped} skipped.`,
       )
+      router.refresh()
+    })
+  }
+
+  const handleImportSold = async (formData: FormData) => {
+    setSuccessMessage(null)
+    setErrorMessage(null)
+    startTransition(async () => {
+      const result = await importSoldJsonAction(formData)
+      if (!result.success) {
+        setErrorMessage(result.error ?? "Import failed")
+        return
+      }
+      const summary = result.summary
+      if (!summary) {
+        setSuccessMessage("Import complete.")
+        router.refresh()
+        return
+      }
+      setSuccessMessage(`Sold import complete: ${summary.created} created (published), ${summary.updated} updated, ${summary.skipped} skipped.`)
       router.refresh()
     })
   }
@@ -840,6 +861,24 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                 </div>
                 <Button type="submit" disabled={isPending} className="bg-gold text-black hover:bg-gold/90">
                   {isPending ? "Importing..." : "Import JSON"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-serif">Import Sold Listings (JSON)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={handleImportSold} className="space-y-4" encType="multipart/form-data">
+                <div className="space-y-2">
+                  <Label htmlFor="soldFile">Upload Bright Data JSON</Label>
+                  <Input id="soldFile" name="file" type="file" accept=".json,application/json" required />
+                  <p className="text-xs text-muted-foreground">Imports every listing as Sold and publishes it.</p>
+                </div>
+                <Button type="submit" disabled={isPending} variant="outline" className="border-gold text-gold hover:bg-gold/10">
+                  {isPending ? "Importing..." : "Import as Sold"}
                 </Button>
               </form>
             </CardContent>

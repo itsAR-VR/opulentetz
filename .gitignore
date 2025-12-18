@@ -6,3 +6,7 @@ node_modules
 
 /lib/generated/prisma
 .DS_Store
+
+# Local imports / exports
+Bright Data Web Data Platform*.json
+Exclusive Timezone Logs*.json

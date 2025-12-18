@@ -31,6 +31,12 @@ const trustMedia = [
 
 export default async function HomePage() {
   const inventory = await getInventory()
+  const availableInventory = inventory.filter((w) => w.status !== "Sold")
+  const soldInventory = inventory
+    .filter((w) => w.status === "Sold")
+    .slice()
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 8)
 
   return (
     <div>
@@ -38,7 +44,7 @@ export default async function HomePage() {
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <HeroVideo
-            src="/hero_images/video_20230311002338.mp4"
+            src="/hero_video/video_20230311002338.mp4"
             poster="/hero_images/IMG_0266 2.png"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-105"
           />
@@ -94,9 +100,53 @@ export default async function HomePage() {
               </p>
             </div>
           </div>
-          <HomeInventory watches={inventory} />
+          <HomeInventory watches={availableInventory} />
         </div>
       </section>
+
+      {/* Recent Sales */}
+      {soldInventory.length > 0 && (
+        <section className="py-20 bg-muted/30">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
+              <div>
+                <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium mb-2">Recent Sales</p>
+                <h2 className="font-serif text-3xl sm:text-4xl font-bold">Recently Sold Watches</h2>
+                <p className="text-muted-foreground mt-2">A snapshot of recent turnover — sold listings remain viewable.</p>
+              </div>
+              <Button asChild variant="outline" className="bg-transparent">
+                <Link href="/inventory">View All Inventory</Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {soldInventory.map((watch) => (
+                <Link key={watch.id} href={`/inventory/${watch.slug}`} className="group">
+                  <div className="relative overflow-hidden rounded-xl border border-border bg-background">
+                    <div className="relative aspect-square bg-muted overflow-hidden">
+                      <Image
+                        src={watch.images[0] || "/placeholder.svg"}
+                        alt={`${watch.brand} ${watch.model}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 rounded-full bg-red-600 px-3 py-1 text-xs font-medium text-white">
+                        Sold
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">{watch.brand}</p>
+                      <h3 className="font-serif text-lg font-medium mt-1 group-hover:text-gold transition-colors">
+                        {watch.model}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">Ref. {watch.reference} • {watch.year}</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Authentication & Trust */}
       <section className="py-20 bg-muted/30">

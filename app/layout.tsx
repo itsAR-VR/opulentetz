@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preload" as="video" href="/hero_images/video_20230311002338.mp4" type="video/mp4" />
+        <link rel="preload" as="video" href="/hero_video/video_20230311002338.mp4" type="video/mp4" />
       </head>
       <body className={`${inter.variable} ${cormorant.variable} font-sans antialiased`}>
         <Header />

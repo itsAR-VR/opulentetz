@@ -67,6 +67,7 @@ export async function generateMetadata({
     reference: watch.reference,
     condition: watch.condition,
     boxAndPapers: watch.boxAndPapers,
+    status: watch.status,
   })
 
   return {
@@ -174,6 +175,7 @@ export default async function WatchDetailPage({
                   reference: watch.reference,
                   condition: watch.condition,
                   boxAndPapers: watch.boxAndPapers,
+                  status: watch.status,
                 })}
               </p>
             </div>
