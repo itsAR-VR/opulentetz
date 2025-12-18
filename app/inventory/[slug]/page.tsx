@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, Check, Phone, Mail, Shield, Award, Clock } from "lucide-react"
+import { ArrowLeft, Phone, Mail, Shield, Award, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { WatchGallery } from "@/components/watch-gallery"
 import { buildStandardProductDescription, buildStandardProductDescriptionInline, formatCadPrice } from "@/lib/formatters"
+import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_HREF } from "@/lib/contact"
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
 
@@ -94,6 +95,11 @@ export default async function WatchDetailPage({
   const relatedWatches = await getRelatedWatches(watch.brand, slug)
 
   const publicStatus = watch.status === "Sold" ? "Sold" : "Available"
+  const showrooms = [
+    { name: "Vancouver", href: "/locations/vancouver-luxury-watches" },
+    { name: "Calgary", href: "/locations/calgary-luxury-watches" },
+    { name: "Toronto", href: "/locations/toronto-luxury-watches" },
+  ] as const
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,7 +125,6 @@ export default async function WatchDetailPage({
             alt={`${watch.brand} ${watch.model}`}
             status={publicStatus}
             statusLabel={publicStatus}
-            boxAndPapers={watch.boxAndPapers}
           />
 
           {/* Watch Details */}
@@ -145,7 +150,7 @@ export default async function WatchDetailPage({
             </div>
 
             {/* Key Specs */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground">Year</p>
                 <p className="font-medium text-lg">{watch.year}</p>
@@ -153,19 +158,6 @@ export default async function WatchDetailPage({
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground">Condition</p>
                 <p className="font-medium text-lg">{watch.condition}</p>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">Set</p>
-                <p className="font-medium text-lg flex items-center gap-2">
-                  {watch.boxAndPapers ? (
-                    <>
-                      <Check className="h-4 w-4 text-green-500" />
-                      Complete Set w/ Box and Papers
-                    </>
-                  ) : (
-                    "Watch Only"
-                  )}
-                </p>
               </div>
               <div className="bg-muted/50 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground">Status</p>
@@ -193,13 +185,13 @@ export default async function WatchDetailPage({
                 size="lg"
                 className="w-full bg-gold hover:bg-gold/90 text-black font-medium"
               >
-                <a href="tel:236-334-3434">
+                <a href={CONTACT_PHONE_HREF}>
                   <Phone className="h-4 w-4 mr-2" />
-                  Call Now: 236-334-3434
+                  Call Now: {CONTACT_PHONE_DISPLAY}
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="w-full">
-                <a href={`mailto:info@exclusivetimezone.com?subject=Inquiry: ${watch.brand} ${watch.model} (${watch.reference})`}>
+                <a href={`mailto:${CONTACT_EMAIL}?subject=Inquiry: ${watch.brand} ${watch.model} (${watch.reference})`}>
                   <Mail className="h-4 w-4 mr-2" />
                   Email About This Watch
                 </a>
@@ -217,8 +209,8 @@ export default async function WatchDetailPage({
                 <p className="text-xs font-medium">Expert Verified</p>
               </div>
               <div className="flex flex-col items-center text-center">
-                <Clock className="h-6 w-6 text-gold mb-2" />
-                <p className="text-xs font-medium">2-Year Warranty</p>
+                <Lock className="h-6 w-6 text-gold mb-2" />
+                <p className="text-xs font-medium">Secure Transactions</p>
               </div>
             </div>
           </div>
@@ -231,34 +223,15 @@ export default async function WatchDetailPage({
               Visit Our Showrooms
             </h2>
             <div className="grid sm:grid-cols-3 gap-6 text-center">
-              <div>
-                <h3 className="font-medium mb-2">Vancouver</h3>
-                <p className="text-sm text-muted-foreground mb-1">
-                  943 W Broadway, Unit 110
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">Vancouver, BC V5Z 4E1</p>
-                <a href="tel:236-833-3952" className="text-gold text-sm hover:underline">
-                  236-833-3952
-                </a>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Calgary</h3>
-                <p className="text-sm text-muted-foreground mb-1">
-                  2120 4th Street SW, Unit 210
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">Calgary, AB T2S 1W7</p>
-                <a href="tel:403-703-6671" className="text-gold text-sm hover:underline">
-                  403-703-6671
-                </a>
-              </div>
-              <div>
-                <h3 className="font-medium mb-2">Toronto</h3>
-                <p className="text-sm text-muted-foreground mb-1">25 Sheppard Ave W</p>
-                <p className="text-sm text-muted-foreground mb-2">North York, ON M2N 6S6</p>
-                <a href="tel:416-298-8666" className="text-gold text-sm hover:underline">
-                  416-298-8666
-                </a>
-              </div>
+              {showrooms.map((showroom) => (
+                <Link
+                  key={showroom.name}
+                  href={showroom.href}
+                  className="font-medium text-lg hover:text-gold transition-colors"
+                >
+                  {showroom.name}
+                </Link>
+              ))}
             </div>
             <p className="text-center text-sm text-muted-foreground mt-6">
               All locations by appointment only

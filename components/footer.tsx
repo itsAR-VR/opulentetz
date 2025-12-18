@@ -1,6 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Instagram } from "lucide-react"
+import { Facebook, Instagram } from "lucide-react"
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_HREF, FACEBOOK_URL, INSTAGRAM_URL } from "@/lib/contact"
 
 const quickLinks = [
   { name: "Inventory", href: "/inventory" },
@@ -14,7 +15,8 @@ const quickLinks = [
 const brands = ["Rolex", "Patek Philippe", "Audemars Piguet", "Omega", "Cartier", "Tudor", "Richard Mille"]
 
 const socialLinks = [
-  { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/exclusivetimezone/" },
+  { name: "Instagram", icon: Instagram, href: INSTAGRAM_URL },
+  { name: "Facebook", icon: Facebook, href: FACEBOOK_URL },
 ]
 
 export function Footer() {
@@ -52,7 +54,7 @@ export function Footer() {
               ))}
             </div>
             <a
-              href="https://www.instagram.com/exclusivetimezone/"
+              href={INSTAGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block mt-4 text-xs text-gold hover:text-gold/80 transition-colors"
@@ -99,13 +101,13 @@ export function Footer() {
               <p>Serving all of Canada</p>
               <p>Vancouver • Calgary • Edmonton • Kelowna • Winnipeg • Toronto • Mississauga • Vaughan • Montreal</p>
               <p className="pt-2">
-                <a href="tel:236-334-3434" className="hover:text-gold transition-colors block">
-                  236-334-3434
+                <a href={CONTACT_PHONE_HREF} className="hover:text-gold transition-colors block">
+                  {CONTACT_PHONE_DISPLAY}
                 </a>
               </p>
               <p>
-                <a href="mailto:info@exclusivetimezone.com" className="hover:text-gold transition-colors">
-                  info@exclusivetimezone.com
+                <a href={CONTACT_EMAIL_HREF} className="hover:text-gold transition-colors">
+                  {CONTACT_EMAIL}
                 </a>
               </p>
             </div>

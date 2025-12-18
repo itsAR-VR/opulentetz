@@ -10,10 +10,9 @@ interface WatchGalleryProps {
   alt: string
   status: string
   statusLabel: string
-  boxAndPapers: boolean
 }
 
-export function WatchGallery({ images, alt, status, statusLabel, boxAndPapers }: WatchGalleryProps) {
+export function WatchGallery({ images, alt, status, statusLabel }: WatchGalleryProps) {
   const normalizedImages = useMemo(
     () => images.filter((src) => typeof src === "string" && src.trim().length > 0),
     [images],
@@ -47,8 +46,6 @@ export function WatchGallery({ images, alt, status, statusLabel, boxAndPapers }:
         >
           {statusLabel}
         </Badge>
-
-        {boxAndPapers && <Badge className="absolute top-4 right-4 bg-gold text-black">Complete Set</Badge>}
       </div>
 
       {normalizedImages.length > 1 && (

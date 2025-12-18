@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const locations = [
+  { name: "Vancouver", href: "/locations/vancouver-luxury-watches" },
   { name: "Calgary", href: "/locations/calgary-luxury-watches" },
   { name: "Edmonton", href: "/locations/edmonton-luxury-watches" },
   { name: "Kelowna", href: "/locations/kelowna-luxury-watches" },

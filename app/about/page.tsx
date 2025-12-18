@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_HREF, FACEBOOK_URL } from "@/lib/contact"
 import { Shield, Award, Users, Clock } from "lucide-react"
 
 export const metadata = {
@@ -95,25 +96,25 @@ export default function AboutPage() {
             <p>
               <strong className="text-foreground">Call or Text:</strong> Monday to Friday 10AM - 6PM, Saturday 11AM -
               4PM MST at{" "}
-              <a href="tel:236-334-3434" className="text-gold hover:underline">
-                236-334-3434
+              <a href={CONTACT_PHONE_HREF} className="text-gold hover:underline">
+                {CONTACT_PHONE_DISPLAY}
               </a>
             </p>
             <p>
               <strong className="text-foreground">Email:</strong>{" "}
-              <a href="mailto:info@exclusivetimezone.com" className="text-gold hover:underline">
-                info@exclusivetimezone.com
+              <a href={CONTACT_EMAIL_HREF} className="text-gold hover:underline">
+                {CONTACT_EMAIL}
               </a>
             </p>
             <p>
               <strong className="text-foreground">Facebook:</strong>{" "}
               <a
-                href="https://www.facebook.com/marketplace/profile/100023717290641/?ref=permalink"
+                href={FACEBOOK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gold hover:underline"
               >
-                View our 500+ Five-Star Reviews
+                Follow / Message Us
               </a>
             </p>
             <p className="pt-2">In-store presentation available by appointment only.</p>

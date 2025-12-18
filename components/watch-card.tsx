@@ -7,7 +7,7 @@ import type { InventoryItem } from "@/lib/types/inventory"
 
 type WatchCardData = Pick<
   InventoryItem,
-  "id" | "brand" | "model" | "reference" | "year" | "condition" | "price" | "status" | "boxAndPapers" | "images" | "slug"
+  "id" | "brand" | "model" | "reference" | "year" | "condition" | "price" | "status" | "images" | "slug"
 > &
   Partial<Pick<InventoryItem, "description" | "featured" | "externalId" | "sourceUrl" | "createdAt" | "updatedAt">>
 
@@ -34,9 +34,6 @@ export function WatchCard({ watch }: WatchCardProps) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {getStatusBadge()}
-          {watch.boxAndPapers && (
-            <Badge className="absolute top-3 right-3 bg-gold text-black text-xs">Complete Set</Badge>
-          )}
         </div>
         <CardContent className="p-4">
           <p className="text-xs text-muted-foreground uppercase tracking-wider">{watch.brand}</p>

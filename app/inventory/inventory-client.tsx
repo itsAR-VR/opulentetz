@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { WatchCard } from "@/components/watch-card"
+import { CONTACT_EMAIL_HREF } from "@/lib/contact"
 import type { InventoryItem } from "@/lib/types/inventory"
 
 interface InventoryClientProps {
@@ -268,7 +269,7 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
             for and we will do the rest.
           </p>
           <Button asChild className="mt-6 bg-gold hover:bg-gold/90 text-black">
-            <a href="mailto:sourcing@opulentz.com">Request a Watch</a>
+            <a href={CONTACT_EMAIL_HREF}>Request a Watch</a>
           </Button>
         </div>
       </div>

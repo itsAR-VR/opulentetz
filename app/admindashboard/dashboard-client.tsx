@@ -562,7 +562,6 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                           alt={`${inventoryDraft.brand} ${inventoryDraft.model}`}
                           status={inventoryDraft.status}
                           statusLabel={inventoryDraft.status}
-                          boxAndPapers={inventoryDraft.boxAndPapers}
                         />
 
                         <div className="flex items-center justify-between gap-2">
@@ -924,7 +923,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                     id="description"
                     name="description"
                     rows={5}
-                    placeholder={`Year: 2023\nRef: 326934\nCondition: MINT\nSet: Complete Set w/ Box and Papers\nAvailable for purchase from Exclusive Time Zone`}
+                    placeholder={`Year: 2023\nRef: 326934\nCondition: MINT\nAvailable for purchase from Exclusive Time Zone`}
                     required
                   />
                 </div>

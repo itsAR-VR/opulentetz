@@ -21,7 +21,7 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Exclusive Time Zone | Luxury Pre-Owned Watches in Canada",
   description:
-    "Canada's trusted destination for authenticated pre-owned luxury watches. Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, Tudor and more. Serving Edmonton, Calgary, Kelowna, Winnipeg, Toronto, and Montreal.",
+    "Canada's trusted destination for authenticated pre-owned luxury watches. Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, Tudor and more. Serving Vancouver, Calgary, Edmonton, Kelowna, Winnipeg, Toronto, and Montreal.",
   icons: {
     icon: [
       { url: "/icon-light-32x32.png", sizes: "32x32", type: "image/png" },

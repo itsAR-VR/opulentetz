@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mail } from "lucide-react"
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_HREF, FACEBOOK_URL, INSTAGRAM_HANDLE, INSTAGRAM_URL } from "@/lib/contact"
 
 type ServiceLocation = {
   name: string
@@ -22,33 +23,39 @@ const contactMethods = [
   {
     icon: Mail,
     title: "Email",
-    value: "info@exclusivetimezone.com",
-    href: "mailto:info@exclusivetimezone.com",
+    value: CONTACT_EMAIL,
+    href: CONTACT_EMAIL_HREF,
     description: "We respond within 24 hours",
   },
   {
     title: "Phone",
-    value: "236-334-3434",
-    href: "tel:236-334-3434",
+    value: CONTACT_PHONE_DISPLAY,
+    href: CONTACT_PHONE_HREF,
     description: "Mon-Sat, by appointment",
   },
   {
     title: "Instagram",
-    value: "@exclusivetimezone",
-    href: "https://www.instagram.com/exclusivetimezone/",
+    value: INSTAGRAM_HANDLE,
+    href: INSTAGRAM_URL,
     description: "Follow us for updates",
+  },
+  {
+    title: "Facebook",
+    value: "facebook.com/arman.etz",
+    href: FACEBOOK_URL,
+    description: "Send us a message",
   },
 ]
 
 const locations: ServiceLocation[] = [
   {
     name: "Vancouver",
-    address: "943 W Broadway, Unit 110, Vancouver, BC V5Z 4E1",
-    href: null,
+    address: null,
+    href: "/locations/vancouver-luxury-watches",
   },
   {
     name: "Calgary",
-    address: "2120 4th Street SW, Unit 210, Calgary, AB T2S 1W7",
+    address: null,
     href: "/locations/calgary-luxury-watches",
   },
   {
@@ -68,7 +75,7 @@ const locations: ServiceLocation[] = [
   },
   {
     name: "Toronto",
-    address: "25 Sheppard Ave W, North York, ON M2N 6S6",
+    address: null,
     href: "/locations/toronto-luxury-watches",
   },
   {
@@ -128,8 +135,8 @@ export default function ContactPage() {
             Fill out the form below and we will get back to you as soon as possible.
             <br />
             For the fastest response, call us at{" "}
-            <a href="tel:236-334-3434" className="text-gold hover:underline">
-              236-334-3434
+            <a href={CONTACT_PHONE_HREF} className="text-gold hover:underline">
+              {CONTACT_PHONE_DISPLAY}
             </a>
           </p>
         </div>
@@ -138,7 +145,7 @@ export default function ContactPage() {
       {/* Contact Info */}
       <section className="py-12 border-b border-border">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-3 gap-6 text-center">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
             {contactMethods.map((method) => (
               <div key={method.title}>
                 <h3 className="font-medium mb-1">{method.title}</h3>
@@ -210,7 +217,7 @@ export default function ContactPage() {
                     type="tel"
                     value={formState.phone}
                     onChange={(e) => setFormState({ ...formState, phone: e.target.value })}
-                    placeholder="236-334-3434"
+                    placeholder={CONTACT_PHONE_DISPLAY}
                   />
                 </div>
                 <div className="space-y-2">
@@ -281,11 +288,6 @@ export default function ContactPage() {
                   </Badge>
                 </div>
                 {location.address && <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{location.address}</p>}
-                <div className="mt-3">
-                  <a href="tel:236-334-3434" className="text-gold hover:underline text-sm">
-                    Call / Text: 236-334-3434
-                  </a>
-                </div>
               </div>
             ))}
           </div>

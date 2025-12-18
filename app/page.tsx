@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, BadgeCheck, CheckCircle2, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { HeroVideo } from "@/components/hero-video"
 import { HomeInventory } from "@/components/home-inventory"
 import { getInventory } from "@/lib/actions"
 
@@ -36,17 +37,11 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
-          <video
-            className="absolute inset-0 h-full w-full object-cover scale-105"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-hidden="true"
-          >
-            <source src="/hero_images/video_20230311002338.mp4" type="video/mp4" />
-          </video>
+          <HeroVideo
+            src="/hero_images/video_20230311002338.mp4"
+            poster="/hero_images/IMG_0266 2.png"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-105"
+          />
           <div className="absolute inset-0 bg-black/20" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,rgba(0,0,0,0.65),rgba(0,0,0,0.38)_45%,rgba(0,0,0,0.12)_72%,rgba(0,0,0,0)_100%)]" />
         </div>

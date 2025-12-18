@@ -14,15 +14,12 @@ export function buildStandardProductDescription(options: {
   year: number
   reference: string
   condition: string
-  boxAndPapers: boolean
+  boxAndPapers?: boolean
 }) {
-  const setLabel = options.boxAndPapers ? "Complete Set w/ Box and Papers" : "Watch Only"
-
   return [
     `Year: ${options.year}`,
     `Ref: ${options.reference}`,
     `Condition: ${formatConditionLabel(options.condition)}`,
-    `Set: ${setLabel}`,
     "Available for purchase from Exclusive Time Zone",
   ].join("\n")
 }
@@ -31,7 +28,7 @@ export function buildStandardProductDescriptionInline(options: {
   year: number
   reference: string
   condition: string
-  boxAndPapers: boolean
+  boxAndPapers?: boolean
 }) {
   return buildStandardProductDescription(options).replaceAll("\n", " • ")
 }
