@@ -45,7 +45,6 @@ export default async function HomePage() {
         <div className="absolute inset-0">
           <HeroVideo
             src="/hero_video/video_20230311002338.mp4"
-            poster="/hero_images/IMG_0266 2.png"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-black/20" />

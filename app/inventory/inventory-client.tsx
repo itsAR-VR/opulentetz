@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Filter, X, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
@@ -18,11 +18,17 @@ interface InventoryClientProps {
 }
 
 export default function InventoryClient({ watches }: InventoryClientProps) {
+  const AVAILABLE_PAGE_SIZE = 24
+  const SOLD_PAGE_SIZE = 12
+
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBrands, setSelectedBrands] = useState<string[]>([])
   const [selectedConditions, setSelectedConditions] = useState<string[]>([])
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  const [availableVisibleCount, setAvailableVisibleCount] = useState(AVAILABLE_PAGE_SIZE)
+  const [soldVisibleCount, setSoldVisibleCount] = useState(SOLD_PAGE_SIZE)
+  const availableSentinelRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const brandParams = Array.from(new Set(searchParams.getAll("brand").filter(Boolean)))
@@ -34,6 +40,22 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
     setSearchQuery(qParam)
   }, [searchParams])
 
+  useEffect(() => {
+    setAvailableVisibleCount(AVAILABLE_PAGE_SIZE)
+    setSoldVisibleCount(SOLD_PAGE_SIZE)
+  }, [searchQuery, selectedBrands, selectedConditions])
+
+  const { availableWatches, soldWatches } = useMemo(() => {
+    const available: InventoryItem[] = []
+    const sold: InventoryItem[] = []
+    for (const watch of watches) {
+      if (watch.status === "Sold") sold.push(watch)
+      else available.push(watch)
+    }
+    sold.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    return { availableWatches: available, soldWatches: sold }
+  }, [watches])
+
   const brandOptions = useMemo(() => {
     const unique = new Set(watches.map((w) => w.brand))
     return Array.from(unique).sort()
@@ -44,21 +66,55 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
     return Array.from(unique).sort()
   }, [watches])
 
-  const filteredWatches = useMemo(() => {
-    return watches.filter((watch) => {
+  const matchesFilters = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    return (watch: InventoryItem) => {
       const matchesSearch =
-        searchQuery === "" ||
-        watch.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        watch.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        watch.reference.toLowerCase().includes(searchQuery.toLowerCase())
+        normalizedQuery === "" ||
+        watch.brand.toLowerCase().includes(normalizedQuery) ||
+        watch.model.toLowerCase().includes(normalizedQuery) ||
+        watch.reference.toLowerCase().includes(normalizedQuery)
 
       const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(watch.brand)
-
       const matchesCondition = selectedConditions.length === 0 || selectedConditions.includes(watch.condition)
 
       return matchesSearch && matchesBrand && matchesCondition
-    })
-  }, [searchQuery, selectedBrands, selectedConditions, watches])
+    }
+  }, [searchQuery, selectedBrands, selectedConditions])
+
+  const filteredAvailable = useMemo(
+    () => availableWatches.filter((watch) => matchesFilters(watch)),
+    [availableWatches, matchesFilters],
+  )
+
+  const filteredSold = useMemo(() => soldWatches.filter((watch) => matchesFilters(watch)), [soldWatches, matchesFilters])
+
+  const visibleAvailable = useMemo(
+    () => filteredAvailable.slice(0, availableVisibleCount),
+    [availableVisibleCount, filteredAvailable],
+  )
+
+  const visibleSold = useMemo(() => filteredSold.slice(0, soldVisibleCount), [filteredSold, soldVisibleCount])
+
+  const canLoadMoreAvailable = availableVisibleCount < filteredAvailable.length
+  const canLoadMoreSold = soldVisibleCount < filteredSold.length
+
+  useEffect(() => {
+    if (!canLoadMoreAvailable) return
+    const sentinel = availableSentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return
+        setAvailableVisibleCount((count) => Math.min(count + 12, filteredAvailable.length))
+      },
+      { rootMargin: "600px 0px" },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [canLoadMoreAvailable, filteredAvailable.length])
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands((prev) => (prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]))
@@ -134,8 +190,8 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
   )
 
   return (
-      <div>
-        {/* Page Header */}
+    <div>
+      {/* Page Header */}
       <section className="relative py-16 bg-black text-white overflow-hidden">
         <div className="absolute inset-0">
           <Image
@@ -239,23 +295,76 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
 
             {/* Results Count */}
             <p className="text-sm text-muted-foreground mb-6">
-              Showing {filteredWatches.length} of {watches.length} timepieces
+              Available: {filteredAvailable.length} of {availableWatches.length}
+              {soldWatches.length > 0 ? ` • Sold: ${filteredSold.length} of ${soldWatches.length}` : ""}
             </p>
 
-            {/* Watch Grid */}
-            {filteredWatches.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredWatches.map((watch) => (
-                  <WatchCard key={watch.id} watch={watch} />
-                ))}
+            {/* Available */}
+            <div>
+              <div className="flex items-end justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="font-serif text-2xl font-medium">Available Watches</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Ready to purchase • All prices in CAD</p>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-lg font-medium">No watches found</p>
-                <p className="text-muted-foreground mt-2">Try adjusting your filters</p>
-                <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
-                  Clear Filters
-                </Button>
+
+              {filteredAvailable.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {visibleAvailable.map((watch) => (
+                      <WatchCard key={watch.id} watch={watch} prefetch={false} />
+                    ))}
+                  </div>
+                  {canLoadMoreAvailable && <div ref={availableSentinelRef} className="h-px w-full mt-8" />}
+                  {canLoadMoreAvailable && (
+                    <div className="flex justify-center mt-8">
+                      <Button variant="outline" onClick={() => setAvailableVisibleCount((c) => Math.min(c + 12, filteredAvailable.length))} className="bg-transparent">
+                        Load More
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-lg font-medium">No available watches found</p>
+                  <p className="text-muted-foreground mt-2">Try adjusting your filters</p>
+                  <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Sold */}
+            {soldWatches.length > 0 && (
+              <div className="mt-16 pt-10 border-t border-border">
+                <div className="flex items-end justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-medium">Sold Watches</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Past sales kept live to show turnover.</p>
+                  </div>
+                </div>
+
+                {filteredSold.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {visibleSold.map((watch) => (
+                        <WatchCard key={watch.id} watch={watch} prefetch={false} />
+                      ))}
+                    </div>
+                    {canLoadMoreSold && (
+                      <div className="flex justify-center mt-8">
+                        <Button variant="outline" onClick={() => setSoldVisibleCount((c) => Math.min(c + SOLD_PAGE_SIZE, filteredSold.length))} className="bg-transparent">
+                          Load More Sold
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-10">
+                    <p className="text-sm text-muted-foreground">No sold watches match your filters.</p>
+                  </div>
+                )}
               </div>
             )}
           </div>

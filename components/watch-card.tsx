@@ -13,9 +13,10 @@ type WatchCardData = Pick<
 
 interface WatchCardProps {
   watch: WatchCardData
+  prefetch?: boolean
 }
 
-export function WatchCard({ watch }: WatchCardProps) {
+export function WatchCard({ watch, prefetch = true }: WatchCardProps) {
   const getStatusBadge = () => {
     if (watch.status === "Sold") {
       return <Badge className="absolute top-3 left-3 bg-red-600 text-white text-xs">Sold</Badge>
@@ -24,7 +25,7 @@ export function WatchCard({ watch }: WatchCardProps) {
   }
 
   return (
-    <Link href={`/inventory/${watch.slug}`} className="group">
+    <Link href={`/inventory/${watch.slug}`} prefetch={prefetch} className="group">
       <Card className="overflow-hidden border-border hover:border-gold/50 transition-colors duration-300">
         <div className="relative aspect-square bg-muted overflow-hidden">
           <Image

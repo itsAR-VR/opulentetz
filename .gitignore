@@ -6,6 +6,7 @@ node_modules
 
 /lib/generated/prisma
 .DS_Store
+*.tsbuildinfo
 
 # Local imports / exports
 Bright Data Web Data Platform*.json
