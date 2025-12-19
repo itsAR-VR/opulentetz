@@ -60,7 +60,7 @@ export default async function HomePage() {
               Welcome to <span className="text-gold">Exclusive Time Zone</span>
             </h1>
             <p className="mt-6 text-lg text-gray-200/85 leading-relaxed max-w-xl">
-              The finest Watches for purchases with no wait list and secure transactions serving all across Canada.
+              The finest watches for purchase with no wait list and secure transactions serving all across North America.
             </p>
 	            <div className="flex flex-col sm:flex-row gap-4 mt-8">
 	              <Button
