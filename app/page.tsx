@@ -52,34 +52,27 @@ export default async function HomePage() {
 	        </div>
 	        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24">
 	          <div className="max-w-2xl">
-	            <p className="text-gold uppercase tracking-[0.35em] text-xs sm:text-sm font-medium mb-6">
-	              Welcome to Exclusive Time Zone
-	            </p>
-	            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-balance">
-	              Curated Luxury.<span className="block text-gold">Timeless Value. Absolute Trust.</span>
-	            </h1>
-	            <div className="mt-6 space-y-5 text-base sm:text-lg text-gray-200/85 leading-relaxed max-w-xl">
-	              <p>
-	                Exclusive Time Zone is a destination for authenticated pre-owned luxury timepieces. Our collection reflects
-	                craftsmanship, heritage, and long-term value—curated for those who understand that a watch is more than an
-	                accessory; it is an investment and a legacy.
-	              </p>
-	              <p>
-	                We offer seamless buying, selling, and trade services, backed by expert authentication and a client-first
-	                experience.
-	              </p>
-	            </div>
+            <div className="flex items-center gap-3 text-gold uppercase tracking-[0.35em] text-xs sm:text-sm font-medium mb-6">
+              <span className="h-px w-10 bg-gold/40" aria-hidden="true" />
+              <p>Established Excellence</p>
+            </div>
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold leading-[1.05] text-balance">
+              Welcome to <span className="text-gold">Exclusive Time Zone</span>
+            </h1>
+            <p className="mt-6 text-lg text-gray-200/85 leading-relaxed max-w-xl">
+              The finest Watches for purchases with no wait list and secure transactions serving all across Canada.
+            </p>
 	            <div className="flex flex-col sm:flex-row gap-4 mt-8">
 	              <Button
 	                asChild
 	                size="lg"
 	                className="bg-gold hover:bg-gold/90 text-black font-medium shadow-[0_18px_45px_rgba(0,0,0,0.45)] ring-1 ring-gold/25"
 	              >
-	                <Link href="/inventory">
-	                  Browse Collection
-	                  <ArrowRight className="ml-2 h-4 w-4" />
-	                </Link>
-	              </Button>
+                <Link href="/inventory">
+                  Browse Inventory
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
 	            </div>
 	          </div>
 	        </div>
