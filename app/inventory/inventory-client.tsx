@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Filter, X, Search } from "lucide-react"
 import { useSearchParams } from "next/navigation"
+import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,12 +16,12 @@ import type { InventoryItem } from "@/lib/types/inventory"
 
 interface InventoryClientProps {
   watches: InventoryItem[]
+  view?: "available" | "sold"
 }
 
-export default function InventoryClient({ watches }: InventoryClientProps) {
+export default function InventoryClient({ watches, view = "available" }: InventoryClientProps) {
   const AVAILABLE_PAGE_SIZE = 24
   const SOLD_PAGE_SIZE = 12
-  type Section = "available" | "sold"
 
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
@@ -29,16 +30,7 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [availableVisibleCount, setAvailableVisibleCount] = useState(AVAILABLE_PAGE_SIZE)
   const [soldVisibleCount, setSoldVisibleCount] = useState(SOLD_PAGE_SIZE)
-  const [activeSection, setActiveSection] = useState<Section>("available")
   const availableSentinelRef = useRef<HTMLDivElement | null>(null)
-
-  const scrollToSection = (section: Section) => {
-    const target = document.getElementById(section)
-    if (!target) return
-    setActiveSection(section)
-    window.history.replaceState(null, "", `#${section}`)
-    target.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
 
   useEffect(() => {
     const brandParams = Array.from(new Set(searchParams.getAll("brand").filter(Boolean)))
@@ -54,42 +46,6 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
     setAvailableVisibleCount(AVAILABLE_PAGE_SIZE)
     setSoldVisibleCount(SOLD_PAGE_SIZE)
   }, [searchQuery, selectedBrands, selectedConditions])
-
-  useEffect(() => {
-    const hash = typeof window !== "undefined" ? window.location.hash.replace("#", "") : ""
-    if (hash === "sold") {
-      setTimeout(() => {
-        const target = document.getElementById("sold")
-        if (!target) return
-        setActiveSection("sold")
-        target.scrollIntoView({ behavior: "smooth", block: "start" })
-      }, 0)
-      return
-    }
-    if (hash === "available") setActiveSection("available")
-  }, [])
-
-  useEffect(() => {
-    const availableEl = document.getElementById("available")
-    if (!availableEl) return
-
-    const soldEl = document.getElementById("sold")
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))
-        if (visible.length === 0) return
-        const id = visible[0]?.target?.id as Section | undefined
-        if (id === "available" || id === "sold") setActiveSection(id)
-      },
-      { rootMargin: "-35% 0px -55% 0px" },
-    )
-
-    observer.observe(availableEl)
-    if (soldEl) observer.observe(soldEl)
-    return () => observer.disconnect()
-  }, [])
 
   const { availableWatches, soldWatches } = useMemo(() => {
     const available: InventoryItem[] = []
@@ -341,76 +297,80 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
 
             {/* Results Count */}
             <p className="text-sm text-muted-foreground mb-6">
-              Available: {filteredAvailable.length} of {availableWatches.length}
-              {soldWatches.length > 0 ? ` • Sold: ${filteredSold.length} of ${soldWatches.length}` : ""}
+              {view === "sold"
+                ? `Sold: ${filteredSold.length} of ${soldWatches.length}`
+                : `Available: ${filteredAvailable.length} of ${availableWatches.length}`}
             </p>
 
             {/* Tabs */}
             <div className="flex flex-wrap items-center gap-2 mb-8">
-              <Button
-                type="button"
-                variant={activeSection === "available" ? "default" : "outline"}
-                className={activeSection === "available" ? "" : "bg-transparent"}
-                onClick={() => scrollToSection("available")}
-              >
-                Available
+              <Button asChild type="button" variant={view === "available" ? "default" : "outline"} className={view === "available" ? "" : "bg-transparent"}>
+                <Link href="/inventory">Available</Link>
               </Button>
               {soldWatches.length > 0 && (
-                <Button
-                  type="button"
-                  variant={activeSection === "sold" ? "default" : "outline"}
-                  className={activeSection === "sold" ? "" : "bg-transparent"}
-                  onClick={() => scrollToSection("sold")}
-                >
-                  Sold
+                <Button asChild type="button" variant={view === "sold" ? "default" : "outline"} className={view === "sold" ? "" : "bg-transparent"}>
+                  <Link href="/inventory/sold">Sold</Link>
                 </Button>
               )}
             </div>
 
+            {view === "sold" && soldWatches.length === 0 && (
+              <div className="text-center py-16">
+                <p className="text-lg font-medium">No sold watches yet</p>
+                <p className="text-muted-foreground mt-2">When a listing is marked as sold, it will appear here.</p>
+              </div>
+            )}
+
             {/* Available */}
-            <div id="available" className="scroll-mt-24">
-              <div className="flex items-end justify-between gap-4 mb-6">
-                <div>
-                  <h2 className="font-serif text-2xl font-medium">Available Watches</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Ready to purchase • All prices in CAD</p>
+            {view === "available" && (
+              <div>
+                <div className="flex items-end justify-between gap-4 mb-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-medium">Available Watches</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Ready to purchase • All prices in CAD</p>
+                  </div>
+                  {soldWatches.length > 0 && (
+                    <Button asChild type="button" variant="outline" className="bg-transparent">
+                      <Link href="/inventory/sold">View Sold Watches</Link>
+                    </Button>
+                  )}
                 </div>
-                {soldWatches.length > 0 && (
-                  <Button type="button" variant="outline" className="bg-transparent" onClick={() => scrollToSection("sold")}>
-                    View Sold Watches
-                  </Button>
+
+                {filteredAvailable.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {visibleAvailable.map((watch) => (
+                        <WatchCard key={watch.id} watch={watch} prefetch={false} />
+                      ))}
+                    </div>
+                    {canLoadMoreAvailable && <div ref={availableSentinelRef} className="h-px w-full mt-8" />}
+                    {canLoadMoreAvailable && (
+                      <div className="flex justify-center mt-8">
+                        <Button
+                          variant="outline"
+                          onClick={() => setAvailableVisibleCount((c) => Math.min(c + 12, filteredAvailable.length))}
+                          className="bg-transparent"
+                        >
+                          Load More
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-16">
+                    <p className="text-lg font-medium">No available watches found</p>
+                    <p className="text-muted-foreground mt-2">Try adjusting your filters</p>
+                    <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
+                      Clear Filters
+                    </Button>
+                  </div>
                 )}
               </div>
-
-              {filteredAvailable.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {visibleAvailable.map((watch) => (
-                      <WatchCard key={watch.id} watch={watch} prefetch={false} />
-                    ))}
-                  </div>
-                  {canLoadMoreAvailable && <div ref={availableSentinelRef} className="h-px w-full mt-8" />}
-                  {canLoadMoreAvailable && (
-                    <div className="flex justify-center mt-8">
-                      <Button variant="outline" onClick={() => setAvailableVisibleCount((c) => Math.min(c + 12, filteredAvailable.length))} className="bg-transparent">
-                        Load More
-                      </Button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-16">
-                  <p className="text-lg font-medium">No available watches found</p>
-                  <p className="text-muted-foreground mt-2">Try adjusting your filters</p>
-                  <Button variant="outline" onClick={clearFilters} className="mt-4 bg-transparent">
-                    Clear Filters
-                  </Button>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* Sold */}
-            {soldWatches.length > 0 && (
-              <div id="sold" className="mt-16 pt-10 border-t border-border scroll-mt-24">
+            {view === "sold" && soldWatches.length > 0 && (
+              <div>
                 <div className="flex items-end justify-between gap-4 mb-6">
                   <div>
                     <h2 className="font-serif text-2xl font-medium">Sold Watches</h2>
