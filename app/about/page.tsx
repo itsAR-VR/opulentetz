@@ -62,27 +62,36 @@ export default function AboutPage() {
       </section>
 
       {/* Company Profile */}
-      <section className="py-16 lg:py-20">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-16 lg:py-20">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero_images/039A9042 2.png"
+            alt="Luxury watch collection"
+            fill
+            className="object-cover opacity-15"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+        </div>
+        <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-serif text-2xl font-medium text-gold mb-6">Company Profile</h2>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              <strong className="text-foreground">Exclusive Time Zone (ETZ)</strong> was founded on a profound admiration
-              for luxury timepieces. With access to a vast network of global wholesalers, authorized dealers, and
-              secondary market specialists, we offer our clients an unrivaled selection of exquisite watches, paired
-              with exceptional service and competitive pricing.
+              At <strong className="text-foreground">ETZ Canada</strong>, we specialize in sourcing and delivering the
+              world’s most sought-after luxury timepieces.
             </p>
             <p>
-              At <strong className="text-foreground">ETZ</strong>, our mission is to be the trusted destination for
-              buying, selling, consigning, and trading luxury watches. We are dedicated to providing a positive,
-              transparent, and secure experience for every client.
+              Our mission is simple: to provide our clients with authentic, investment-grade watches through a
+              seamless, secure, and transparent buying experience. Every timepiece we offer is carefully curated,
+              verified, and selected to meet the highest standards of quality and craftsmanship.
             </p>
             <p>
-              Each timepiece in our collection is meticulously inspected and authenticated by expert watchmakers, and
-              when necessary, carefully serviced and restored to meet our stringent quality standards.{" "}
-              <strong className="text-foreground">ETZ</strong> guarantees the complete authenticity of all products upon
-              delivery and recommends that all watches be exclusively serviced by the manufacturer's approved
-              watchmakers.
+              We believe a watch is more than an accessory—it’s a reflection of success, precision, and personal
+              legacy. That’s why we take a personalized approach with every client, understanding your preferences,
+              lifestyle, and long-term vision before guiding you to the perfect piece.
+            </p>
+            <p>
+              With no waitlists, trusted sourcing, and a commitment to excellence,{" "}
+              <strong className="text-foreground">ETZ Canada</strong> is where exclusivity meets confidence.
             </p>
           </div>
         </div>
