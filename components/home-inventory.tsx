@@ -85,9 +85,14 @@ export function HomeInventory({ watches }: HomeInventoryProps) {
 
       {visibleWatches.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div
+            className="-mx-4 flex gap-6 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0"
+            aria-label="Available watches"
+          >
             {visibleWatches.map((watch) => (
-              <WatchCard key={watch.id} watch={watch} />
+              <div key={watch.id} className="shrink-0 w-[260px] sm:w-[280px] lg:w-[300px]">
+                <WatchCard watch={watch} />
+              </div>
             ))}
           </div>
 

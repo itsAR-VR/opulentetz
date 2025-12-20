@@ -20,6 +20,7 @@ interface InventoryClientProps {
 export default function InventoryClient({ watches }: InventoryClientProps) {
   const AVAILABLE_PAGE_SIZE = 24
   const SOLD_PAGE_SIZE = 12
+  type Section = "available" | "sold"
 
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState("")
@@ -28,7 +29,16 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [availableVisibleCount, setAvailableVisibleCount] = useState(AVAILABLE_PAGE_SIZE)
   const [soldVisibleCount, setSoldVisibleCount] = useState(SOLD_PAGE_SIZE)
+  const [activeSection, setActiveSection] = useState<Section>("available")
   const availableSentinelRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollToSection = (section: Section) => {
+    const target = document.getElementById(section)
+    if (!target) return
+    setActiveSection(section)
+    window.history.replaceState(null, "", `#${section}`)
+    target.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   useEffect(() => {
     const brandParams = Array.from(new Set(searchParams.getAll("brand").filter(Boolean)))
@@ -44,6 +54,42 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
     setAvailableVisibleCount(AVAILABLE_PAGE_SIZE)
     setSoldVisibleCount(SOLD_PAGE_SIZE)
   }, [searchQuery, selectedBrands, selectedConditions])
+
+  useEffect(() => {
+    const hash = typeof window !== "undefined" ? window.location.hash.replace("#", "") : ""
+    if (hash === "sold") {
+      setTimeout(() => {
+        const target = document.getElementById("sold")
+        if (!target) return
+        setActiveSection("sold")
+        target.scrollIntoView({ behavior: "smooth", block: "start" })
+      }, 0)
+      return
+    }
+    if (hash === "available") setActiveSection("available")
+  }, [])
+
+  useEffect(() => {
+    const availableEl = document.getElementById("available")
+    if (!availableEl) return
+
+    const soldEl = document.getElementById("sold")
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))
+        if (visible.length === 0) return
+        const id = visible[0]?.target?.id as Section | undefined
+        if (id === "available" || id === "sold") setActiveSection(id)
+      },
+      { rootMargin: "-35% 0px -55% 0px" },
+    )
+
+    observer.observe(availableEl)
+    if (soldEl) observer.observe(soldEl)
+    return () => observer.disconnect()
+  }, [])
 
   const { availableWatches, soldWatches } = useMemo(() => {
     const available: InventoryItem[] = []
@@ -299,13 +345,40 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
               {soldWatches.length > 0 ? ` • Sold: ${filteredSold.length} of ${soldWatches.length}` : ""}
             </p>
 
+            {/* Tabs */}
+            <div className="flex flex-wrap items-center gap-2 mb-8">
+              <Button
+                type="button"
+                variant={activeSection === "available" ? "default" : "outline"}
+                className={activeSection === "available" ? "" : "bg-transparent"}
+                onClick={() => scrollToSection("available")}
+              >
+                Available
+              </Button>
+              {soldWatches.length > 0 && (
+                <Button
+                  type="button"
+                  variant={activeSection === "sold" ? "default" : "outline"}
+                  className={activeSection === "sold" ? "" : "bg-transparent"}
+                  onClick={() => scrollToSection("sold")}
+                >
+                  Sold
+                </Button>
+              )}
+            </div>
+
             {/* Available */}
-            <div>
+            <div id="available" className="scroll-mt-24">
               <div className="flex items-end justify-between gap-4 mb-6">
                 <div>
                   <h2 className="font-serif text-2xl font-medium">Available Watches</h2>
                   <p className="text-sm text-muted-foreground mt-1">Ready to purchase • All prices in CAD</p>
                 </div>
+                {soldWatches.length > 0 && (
+                  <Button type="button" variant="outline" className="bg-transparent" onClick={() => scrollToSection("sold")}>
+                    View Sold Watches
+                  </Button>
+                )}
               </div>
 
               {filteredAvailable.length > 0 ? (
@@ -337,7 +410,7 @@ export default function InventoryClient({ watches }: InventoryClientProps) {
 
             {/* Sold */}
             {soldWatches.length > 0 && (
-              <div className="mt-16 pt-10 border-t border-border">
+              <div id="sold" className="mt-16 pt-10 border-t border-border scroll-mt-24">
                 <div className="flex items-end justify-between gap-4 mb-6">
                   <div>
                     <h2 className="font-serif text-2xl font-medium">Sold Watches</h2>
