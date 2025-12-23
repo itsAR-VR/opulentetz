@@ -110,7 +110,7 @@ export async function importJsonAction(formData: FormData) {
     return { success: false, error: "No listings found in JSON." }
   }
 
-  const summary = await importListings(entries)
+  const summary = await importListings(entries, { refreshImages: true })
   revalidatePath("/")
   revalidatePath("/inventory")
   return { success: true, summary }
@@ -139,7 +139,12 @@ export async function importSoldJsonAction(formData: FormData) {
     return { success: false, error: "No listings found in JSON." }
   }
 
-  const summary = await importListings(entries, { forceStatus: "Sold", forceVisibility: "PUBLIC", forceFeatured: false })
+  const summary = await importListings(entries, {
+    forceStatus: "Sold",
+    forceVisibility: "PUBLIC",
+    forceFeatured: false,
+    refreshImages: true,
+  })
   revalidatePath("/")
   revalidatePath("/inventory")
   return { success: true, summary }

@@ -1,4 +1,4 @@
-import "dotenv/config"
+import "./load-env"
 import fs from "fs"
 import path from "path"
 import { importListings, parseListingsFromJson } from "../lib/importers/facebook"
@@ -26,7 +26,7 @@ async function main() {
     process.exit(1)
   }
 
-  const summary = await importListings(entries)
+  const summary = await importListings(entries, { refreshImages: true })
 
   console.log(`Import complete: ${summary.created} created, ${summary.updated} updated, ${summary.skipped} skipped.`)
 }

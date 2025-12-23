@@ -1,6 +1,6 @@
 import { Prisma } from "../generated/prisma/client"
 import { prisma } from "../prisma"
-import { ingestInventoryImagesFromUrls } from "../inventory-images"
+import { ingestInventoryImagesFromUrls, isStoredInventoryImageUrl } from "../inventory-images"
 
 export type RawListing = {
   product_id?: string | number
@@ -26,6 +26,7 @@ export type ImportOptions = {
   forceStatus?: string
   forceFeatured?: boolean
   forceBoxAndPapers?: boolean
+  refreshImages?: boolean
 }
 
 export const toSlug = (value: string) =>
@@ -287,12 +288,35 @@ const upsertListing = async (item: RawListing, options: ImportOptions) => {
     select: { id: true, images: true },
   })
 
-  if (!existing && imageSourceUrls.length > 0) {
-    const stored = await ingestInventoryImagesFromUrls(record.id, imageSourceUrls)
-    await prisma.inventory.update({
-      where: { id: record.id },
-      data: { images: stored },
-    })
+  const shouldRefreshImages = imageSourceUrls.length > 0 && (!existing || options.refreshImages)
+
+  if (shouldRefreshImages) {
+    const hasStoredImages = record.images.some((src) => isStoredInventoryImageUrl(src))
+    const shouldDeleteExistingImages = !hasStoredImages
+
+    const startSortOrder = shouldDeleteExistingImages
+      ? 0
+      : ((await prisma.inventoryImage.findFirst({
+          where: { inventoryId: record.id },
+          orderBy: [{ sortOrder: "desc" }, { createdAt: "desc" }],
+          select: { sortOrder: true },
+        }))?.sortOrder ?? -1) + 1
+
+    if (shouldDeleteExistingImages) {
+      await prisma.inventoryImage.deleteMany({
+        where: { inventoryId: record.id },
+      })
+    }
+
+    const stored = await ingestInventoryImagesFromUrls(record.id, imageSourceUrls, { startSortOrder })
+    const hasAnyStored = stored.some((src) => isStoredInventoryImageUrl(src))
+
+    if (hasAnyStored) {
+      await prisma.inventory.update({
+        where: { id: record.id },
+        data: { images: stored },
+      })
+    }
   }
 
   return { created: !existing, skipped: false }
