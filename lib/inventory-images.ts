@@ -53,6 +53,7 @@ type IngestOptions = {
   timeoutMs?: number
   maxBytes?: number
   maxImages?: number
+  startSortOrder?: number
 }
 
 export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: string[], options: IngestOptions = {}) {
@@ -60,16 +61,51 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
   const maxBytes = options.maxBytes ?? 10 * 1024 * 1024
   const maxImages = options.maxImages ?? 12
 
-  const unique = Array.from(new Set(urls.map((u) => u.trim()).filter(Boolean))).slice(0, maxImages)
+  const normalized = urls.map((u) => u.trim()).filter(Boolean)
   const results: string[] = []
+  const storedByExternalUrl = new Map<string, string>()
 
-  let sortOrder = 0
-  for (const url of unique) {
+  let sortOrder = options.startSortOrder ?? 0
+  let created = 0
+
+  const cookie = (process.env.FBCDN_COOKIE ?? process.env.FACEBOOK_COOKIE ?? "").trim()
+  const requestHeaders: Record<string, string> = {
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+  }
+  if (cookie) {
+    requestHeaders.Cookie = cookie
+    requestHeaders.Referer = "https://www.facebook.com/"
+  }
+
+  for (const url of normalized) {
+    if (isStoredInventoryImageUrl(url)) {
+      results.push(url)
+      continue
+    }
+
+    if (!/^https?:\/\//i.test(url)) {
+      results.push(url)
+      continue
+    }
+
+    const cached = storedByExternalUrl.get(url)
+    if (cached) {
+      results.push(cached)
+      continue
+    }
+
+    if (created >= maxImages) {
+      results.push(url)
+      continue
+    }
+
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
     try {
-      const response = await fetch(url, { signal: controller.signal, redirect: "follow" })
+      const response = await fetch(url, { signal: controller.signal, redirect: "follow", headers: requestHeaders })
       if (!response.ok) {
         results.push(url)
         continue
@@ -90,7 +126,7 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
 
       const fileName = filenameFromUrl(url)
 
-      const created = await prisma.inventoryImage.create({
+      const createdRecord = await prisma.inventoryImage.create({
         data: {
           inventoryId,
           sortOrder,
@@ -103,8 +139,11 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
         select: { id: true },
       })
 
-      results.push(buildInventoryImageUrl(created.id))
+      const stored = buildInventoryImageUrl(createdRecord.id)
+      storedByExternalUrl.set(url, stored)
+      results.push(stored)
       sortOrder += 1
+      created += 1
     } catch {
       results.push(url)
     } finally {
@@ -114,4 +153,3 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
 
   return results
 }
-
