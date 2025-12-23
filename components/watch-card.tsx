@@ -3,6 +3,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatCadPrice } from "@/lib/formatters"
+import { resolveImageSrc } from "@/lib/image-src"
 import type { InventoryItem } from "@/lib/types/inventory"
 
 type WatchCardData = Pick<
@@ -29,7 +30,7 @@ export function WatchCard({ watch, prefetch = true }: WatchCardProps) {
       <Card className="overflow-hidden border-border hover:border-gold/50 transition-colors duration-300">
         <div className="relative aspect-square bg-muted overflow-hidden">
           <Image
-            src={watch.images[0] || "/placeholder.svg"}
+            src={resolveImageSrc(watch.images?.[0])}
             alt={`${watch.brand} ${watch.model}`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"

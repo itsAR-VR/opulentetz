@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { WatchGallery } from "@/components/watch-gallery"
 import { buildStandardProductDescription, buildStandardProductDescriptionInline, formatCadPrice } from "@/lib/formatters"
 import { CONTACT_EMAIL, CONTACT_PHONE_DISPLAY, CONTACT_PHONE_HREF } from "@/lib/contact"
+import { resolveImageSrc } from "@/lib/image-src"
 import { prisma } from "@/lib/prisma"
 import type { Metadata } from "next"
 
@@ -257,7 +258,7 @@ export default async function WatchDetailPage({
                   <Card className="overflow-hidden border-border hover:border-gold/50 transition-colors">
                     <div className="relative aspect-square bg-muted overflow-hidden">
                       <Image
-                        src={relatedWatch.images[0] || "/placeholder.svg"}
+                        src={resolveImageSrc(relatedWatch.images?.[0])}
                         alt={`${relatedWatch.brand} ${relatedWatch.model}`}
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-500"

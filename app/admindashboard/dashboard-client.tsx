@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { WatchGallery } from "@/components/watch-gallery"
 import { cn } from "@/lib/utils"
 import { formatCadPrice } from "@/lib/formatters"
+import { resolveImageSrc } from "@/lib/image-src"
 import { Mail, Phone, Clock, Package, User } from "lucide-react"
 
 interface SellRequest {
@@ -536,7 +537,7 @@ export default function AdminDashboardClient({ sessionEmail, sellRequests, inqui
                         >
                           <div className="relative aspect-square bg-muted overflow-hidden">
                             <Image
-                              src={item.images[0] || "/placeholder.svg"}
+                              src={resolveImageSrc(item.images?.[0])}
                               alt={`${item.brand} ${item.model}`}
                               fill
                               className="object-cover"

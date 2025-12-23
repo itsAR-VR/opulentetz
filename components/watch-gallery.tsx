@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import { resolveImageSrc } from "@/lib/image-src"
 import { cn } from "@/lib/utils"
 
 interface WatchGalleryProps {
@@ -20,7 +21,7 @@ export function WatchGallery({ images, alt, status, statusLabel }: WatchGalleryP
 
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const activeSrc = normalizedImages[activeIndex] || "/placeholder.svg"
+  const activeSrc = resolveImageSrc(normalizedImages[activeIndex])
 
   const statusTone = useMemo(() => {
     const normalized = status.trim().toLowerCase()
@@ -61,7 +62,7 @@ export function WatchGallery({ images, alt, status, statusLabel }: WatchGalleryP
               )}
               aria-label={`View image ${index + 1}`}
             >
-              <Image src={src} alt={`${alt} - Image ${index + 1}`} fill className="object-cover" />
+              <Image src={resolveImageSrc(src)} alt={`${alt} - Image ${index + 1}`} fill className="object-cover" />
             </button>
           ))}
         </div>
