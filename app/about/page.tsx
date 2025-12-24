@@ -62,21 +62,21 @@ export default function AboutPage() {
       </section>
 
       {/* Company Profile */}
-      <section className="relative overflow-hidden py-16 lg:py-20">
+      <section className="relative overflow-hidden py-16 lg:py-20 text-white">
         <div className="absolute inset-0">
           <Image
             src="/hero_images/039A9042 2.png"
             alt="Luxury watch collection"
             fill
-            className="object-cover opacity-100"
+            className="object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/70 to-black/80" />
         </div>
         <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-serif text-2xl font-medium text-gold mb-6">Company Profile</h2>
-          <div className="space-y-4 text-muted-foreground leading-relaxed">
+          <div className="space-y-4 text-white/80 leading-relaxed">
             <p>
-              At <strong className="text-foreground">ETZ Canada</strong>, we specialize in sourcing and delivering the
+              At <strong className="text-white">ETZ Canada</strong>, we specialize in sourcing and delivering the
               world’s most sought-after luxury timepieces.
             </p>
             <p>
@@ -91,7 +91,7 @@ export default function AboutPage() {
             </p>
             <p>
               With no waitlists, trusted sourcing, and a commitment to excellence,{" "}
-              <strong className="text-foreground">ETZ Canada</strong> is where exclusivity meets confidence.
+              <strong className="text-white">ETZ Canada</strong> is where exclusivity meets confidence.
             </p>
           </div>
         </div>
