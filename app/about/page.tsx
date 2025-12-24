@@ -98,8 +98,17 @@ export default function AboutPage() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-16 lg:py-20 bg-muted/30">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-16 lg:py-20 bg-muted/30">
+        <div className="absolute inset-0">
+          <Image
+            src="/hero_images/039A9048 2.png"
+            alt="Luxury watch detail"
+            fill
+            className="object-cover opacity-15"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
+        </div>
+        <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="font-serif text-2xl font-medium text-gold mb-6">Contact Us</h2>
           <div className="space-y-3 text-muted-foreground">
             <p>
