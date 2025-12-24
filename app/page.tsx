@@ -1,10 +1,12 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, BadgeCheck, CheckCircle2, Wrench } from "lucide-react"
+import { ArrowRight, BadgeCheck, CheckCircle2, Instagram, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HeroVideo } from "@/components/hero-video"
 import { HomeInventory } from "@/components/home-inventory"
-import { getInventory } from "@/lib/actions"
+import { getHomeWatches } from "@/lib/actions"
+
+export const dynamic = "force-dynamic"
 
 const trustBullets = ["Certified Authenticity", "Multi-point Inspection", "Verified Sourcing"] as const
 
@@ -30,8 +32,7 @@ const trustMedia = [
 ] as const
 
 export default async function HomePage() {
-  const inventory = await getInventory()
-  const availableInventory = inventory.filter((w) => w.status !== "Sold")
+  const availableInventory = await getHomeWatches()
 
   return (
     <div>
@@ -41,6 +42,7 @@ export default async function HomePage() {
           <HeroVideo
             src="/hero_video/video_20230311002338.mp4"
             poster="/hero_images/IMG_0266 2.png"
+            preload="auto"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover scale-105"
           />
           <div className="absolute inset-0 bg-black/20" />
@@ -173,6 +175,31 @@ export default async function HomePage() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Instagram */}
+      <section className="py-10 border-t border-border bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-gold uppercase tracking-[0.2em] text-sm font-medium">Follow us on Instagram</p>
+              <a
+                href="https://www.instagram.com/opulent.etz/"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-flex items-center gap-2 font-serif text-2xl hover:text-gold transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+                @opulent.etz
+              </a>
+            </div>
+            <Button asChild variant="outline" className="bg-transparent">
+              <a href="https://www.instagram.com/opulent.etz/" target="_blank" rel="noreferrer">
+                Visit Instagram
+              </a>
+            </Button>
           </div>
         </div>
       </section>

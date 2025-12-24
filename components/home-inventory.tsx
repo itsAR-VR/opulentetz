@@ -7,10 +7,10 @@ import { WatchCard } from "@/components/watch-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { InventoryItem } from "@/lib/types/inventory"
+import type { WatchSummary } from "@/lib/actions"
 
 interface HomeInventoryProps {
-  watches: InventoryItem[]
+  watches: WatchSummary[]
 }
 
 export function HomeInventory({ watches }: HomeInventoryProps) {
