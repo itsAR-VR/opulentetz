@@ -7,7 +7,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
   const record = await prisma.inventoryImage.findUnique({
     where: { id },
-    select: { data: true, contentType: true },
+    select: { data: true, contentType: true, size: true },
   })
 
   if (!record) {
@@ -17,7 +17,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return new Response(record.data, {
     headers: {
       "Content-Type": record.contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Content-Length": String(record.size),
+      // Cache at the browser and the CDN/edge.
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
     },
   })
 }

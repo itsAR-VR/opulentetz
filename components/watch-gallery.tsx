@@ -33,7 +33,14 @@ export function WatchGallery({ images, alt, status, statusLabel }: WatchGalleryP
   return (
     <div className="space-y-4">
       <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
-        <Image src={activeSrc} alt={alt} fill className="object-cover" priority />
+        <Image
+          src={activeSrc}
+          alt={alt}
+          fill
+          sizes="(max-width: 1024px) 92vw, 50vw"
+          className="object-cover"
+          priority
+        />
 
         <Badge
           className={cn(
@@ -62,7 +69,13 @@ export function WatchGallery({ images, alt, status, statusLabel }: WatchGalleryP
               )}
               aria-label={`View image ${index + 1}`}
             >
-              <Image src={resolveImageSrc(src)} alt={`${alt} - Image ${index + 1}`} fill className="object-cover" />
+              <Image
+                src={resolveImageSrc(src)}
+                alt={`${alt} - Image ${index + 1}`}
+                fill
+                sizes="(max-width: 1024px) 23vw, 160px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>

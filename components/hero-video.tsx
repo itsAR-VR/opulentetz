@@ -6,9 +6,10 @@ interface HeroVideoProps {
   src: string
   poster?: string
   className?: string
+  preload?: "none" | "metadata" | "auto"
 }
 
-export function HeroVideo({ src, poster, className }: HeroVideoProps) {
+export function HeroVideo({ src, poster, className, preload = "metadata" }: HeroVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export function HeroVideo({ src, poster, className }: HeroVideoProps) {
       muted
       loop
       playsInline
-      preload="auto"
+      preload={preload}
       poster={poster}
       aria-hidden="true"
     >

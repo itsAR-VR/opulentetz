@@ -33,6 +33,7 @@ export function WatchCard({ watch, prefetch = true }: WatchCardProps) {
             src={resolveImageSrc(watch.images?.[0])}
             alt={`${watch.brand} ${watch.model}`}
             fill
+            sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 25vw"
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {getStatusBadge()}
