@@ -68,7 +68,7 @@ export default function AboutPage() {
             src="/hero_images/039A9042 2.png"
             alt="Luxury watch collection"
             fill
-            className="object-cover opacity-0"
+            className="object-cover opacity-100"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/90 to-background" />
         </div>
