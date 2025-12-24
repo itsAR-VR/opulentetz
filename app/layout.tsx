@@ -22,15 +22,6 @@ export const metadata: Metadata = {
   title: "Exclusive Time Zone | Luxury Pre-Owned Watches in Canada",
   description:
     "Canada's trusted destination for authenticated pre-owned luxury watches. Rolex, Patek Philippe, Audemars Piguet, Omega, Cartier, Tudor and more. Serving Vancouver, Calgary, Edmonton, Kelowna, Winnipeg, Toronto, and Montreal.",
-  icons: {
-    icon: [
-      { url: "/icon-light-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon-dark-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-    shortcut: "/icon-light-32x32.png",
-    apple: "/apple-icon.png",
-  },
 }
 
 export default function RootLayout({
