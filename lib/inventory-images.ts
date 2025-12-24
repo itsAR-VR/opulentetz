@@ -54,12 +54,32 @@ type IngestOptions = {
   maxBytes?: number
   maxImages?: number
   startSortOrder?: number
+  delayMs?: number
+  jitterMs?: number
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const rewriteFbCdnHost = (rawUrl: string) => {
+  try {
+    const url = new URL(rawUrl)
+    const host = url.hostname.toLowerCase()
+    if (!host.endsWith("fbcdn.net")) return rawUrl
+    if (host === "scontent.xx.fbcdn.net") return rawUrl
+
+    url.hostname = "scontent.xx.fbcdn.net"
+    return url.toString()
+  } catch {
+    return rawUrl
+  }
 }
 
 export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: string[], options: IngestOptions = {}) {
   const timeoutMs = options.timeoutMs ?? 15_000
   const maxBytes = options.maxBytes ?? 10 * 1024 * 1024
   const maxImages = options.maxImages ?? 12
+  const delayMs = options.delayMs ?? Number(process.env.INVENTORY_IMAGE_FETCH_DELAY_MS ?? 900)
+  const jitterMs = options.jitterMs ?? Number(process.env.INVENTORY_IMAGE_FETCH_JITTER_MS ?? 350)
 
   const normalized = urls.map((u) => u.trim()).filter(Boolean)
   const results: string[] = []
@@ -90,6 +110,11 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
       continue
     }
 
+    if (delayMs > 0) {
+      const jitter = jitterMs > 0 ? Math.floor(Math.random() * (jitterMs + 1)) : 0
+      await sleep(delayMs + jitter)
+    }
+
     const cached = storedByExternalUrl.get(url)
     if (cached) {
       results.push(cached)
@@ -105,7 +130,11 @@ export async function ingestInventoryImagesFromUrls(inventoryId: string, urls: s
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
     try {
-      const response = await fetch(url, { signal: controller.signal, redirect: "follow", headers: requestHeaders })
+      const primaryUrl = rewriteFbCdnHost(url)
+      let response = await fetch(primaryUrl, { signal: controller.signal, redirect: "follow", headers: requestHeaders })
+      if (!response.ok && primaryUrl !== url) {
+        response = await fetch(url, { signal: controller.signal, redirect: "follow", headers: requestHeaders })
+      }
       if (!response.ok) {
         results.push(url)
         continue
